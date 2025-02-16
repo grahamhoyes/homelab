@@ -1,0 +1,71 @@
+- name: Configure Proxmox hosts
+  hosts: proxmox
+  gather_facts: true
+  tasks:
+    - name: Verify running on a Proxmox host
+      assert:
+        that: "'pve' in ansible_kernel"
+        fail_msg: "This playbook must be run on a Proxmox host"
+        success_msg: "Running on proxmox host {{ inventory_hostname }}"
+
+    - name: Install proxmoxer package
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+        name: python3-proxmoxer
+    
+    - name: Confirm configure GPU passthrough
+      pause:
+        prompt: |
+          Warning! This will remove the ability to use onboard graphics to access the Proxmox console.
+
+          Press Enter to continue, or Ctrl+C then A to cancel.
+
+    - name: Backup GRUB configuration
+      copy:
+        src: /etc/default/grub
+        dest: /etc/default/grub.bak
+        backup: true
+        remote_src: true
+      changed_when: false
+
+    - name: Configure GRUB for GPU passthrough
+      lineinfile:
+        path: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=".*"$'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt initcall_blacklist=sysfb_init"'
+      notify: update grub
+
+    - name: Backup kernel modules configuration
+      copy:
+        src: /etc/modules
+        dest: /etc/modules.bak
+        backup: true
+        remote_src: true
+      changed_when: false
+
+    - name: Add required kernel modules
+      lineinfile:
+        path: /etc/modules
+        line: "{{ item }}"
+        create: true
+      loop:
+        - vfio
+        - vfio_iommu_type1
+        - vfio_pci
+        - vfio_virqfd
+      notify: update initramfs
+
+  handlers:
+    - name: update grub
+      shell: update-grub
+      notify: reboot server
+
+    - name: update initramfs
+      shell: update-initramfs -u -k all
+      notify: reboot server
+
+    - name: reboot server
+      reboot:
+        msg: "Rebooting {{ inventory_hostname }} to apply GPU passthrough configuration"
+        reboot_timeout: 3600

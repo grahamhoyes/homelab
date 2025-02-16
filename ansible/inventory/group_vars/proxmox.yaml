@@ -1,0 +1,3 @@
+ansible_user: root
+proxmox_image_storage: graham-ds920/template/iso/
+proxmox_template_storage: graham-ds920

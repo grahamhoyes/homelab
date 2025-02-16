@@ -1,0 +1,5 @@
+# Default values for k3s_masters nodes. These can be overridden per node in inventory.yaml
+vm_cpu_cores: 2
+vm_memory_mb: 2048
+vm_disk_gb: 50
+vlan_id: 20

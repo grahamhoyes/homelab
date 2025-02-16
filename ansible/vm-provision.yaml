@@ -1,0 +1,213 @@
+- name: Create template VM from Ubuntu cloud image
+  hosts: proxmox[0]
+  gather_facts: true
+  tasks:
+    - name: Create images directory
+      file:
+        path: /mnt/pve/{{ proxmox_image_storage }}
+        state: directory
+        mode: '0755'
+    
+    - name: Download Ubuntu cloud image
+      get_url:
+        url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+        dest: /mnt/pve/{{ proxmox_image_storage | regex_replace('\/$', '') }}/noble-server-cloudimg-amd64.img
+        force: no  # Don't redownload if exists
+    
+    - name: Create template VM
+      proxmox_kvm:
+        api_host: "{{ ansible_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ inventory_hostname }}"
+        name: "ubuntu-2404-template"
+        vmid: 9000
+        cores: 2
+        memory: 2048
+        net:
+          net0: "virtio,bridge={{ network_bridge}}"
+        scsihw: "virtio-scsi-pci"
+        boot: c
+        bootdisk: scsi0
+        serial:
+          serial0: socket
+        vga: "serial0"
+        machine: q35  # Necessary for GPU passthrough
+        storage: "{{ proxmox_template_storage }}"
+
+    - name: Check if VM template exists
+      lineinfile:
+        name: /etc/pve/qemu-server/9000.conf
+        line: "template: 1"
+        state: absent
+      check_mode: true
+      register: template_exists
+      changed_when: false
+
+    - name: Import disk and finish template configuration
+      when: not template_exists.found
+      block:
+      - name: Import cloud image disk
+        command: qm disk import 9000 /mnt/pve/{{ proxmox_image_storage | regex_replace('\/$', '') }}/noble-server-cloudimg-amd64.img local-lvm
+      
+      - name: Configure disks
+        command: "{{ item }}"
+        loop:
+          # Attach the disk
+          - qm set 9000 --scsi0 local-lvm:vm-9000-disk-0
+          # Add cloud init drive
+          - qm set 9000 --ide2 local-lvm:cloudinit
+
+      - name: Convert to template
+        command: qm template 9000
+
+# VMs all get created when connected to the first Proxmox host, where the template above
+# was created. The VMs themselves get put on the relevant node.
+- name: Create k3s cluster VMs
+  hosts: proxmox[0]
+  gather_facts: false
+  tasks:
+    - name: Clone VM from template
+      loop: "{{ groups['k3s_cluster'] }}"
+      loop_control:
+        loop_var: vm_name
+        label: "Creating {{ vm_name }}"
+      vars:
+        vm_config: "{{ hostvars[vm_name] }}"
+      proxmox_kvm:
+        api_host: "{{ ansible_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ vm_config.proxmox_host }}"
+        name: "{{ vm_config.inventory_hostname }}"
+        clone: "ubuntu-2404-template"
+        newid: "{{ vm_config.vm_id }}"
+        full: yes
+        description: "{{ cluster_name }} k3s {{ 'control plane' if vm_config.inventory_hostname in groups['k3s_servers'] else 'worker' }} node on vlan {{ vm_config.vlan_id }}"
+
+        # Hardware
+        memory: "{{ vm_config.vm_memory_mb }}"
+        cores: "{{ vm_config.vm_cpu_cores }}"
+        hostpci:
+          # GPU passthrough if gpu_type is set
+          hostpci0: "{{ 'host=' + proxmox_gpu_pci_id + ',pcie=1' if vm_config.gpu_type is defined else omit }}"
+
+        # Cloud-Init settings
+        net:
+          net0: "virtio,bridge={{ network_bridge }},tag={{ vm_config.vlan_id }}"
+        sshkeys: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        ipconfig:
+          ipconfig0: "ip={{ vm_config.ansible_host }}/{{ vm_config.netmask_cidr | default(netmask_cidr) }},gw={{ network_gateway }}"
+        ciuser: "{{ ansible_user }}"
+        cipassword: "{{ vm_default_password }}"
+    
+    - name: Resize VM disks
+      loop: "{{ groups['k3s_cluster'] }}"
+      loop_control:
+        loop_var: vm_name
+        label: "Resizing disk for {{ vm_name }}"
+      vars:
+        vm_config: "{{ hostvars[vm_name] }}"
+      community.general.proxmox_disk:
+        api_host: "{{ ansible_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ vm_config.proxmox_host }}"
+        vmid: "{{ vm_config.vm_id }}"
+        disk: scsi0
+        size: "{{ vm_config.vm_disk_gb }}G"
+        state: resized
+
+    - name: Start VMs
+      loop: "{{ groups['k3s_cluster'] }}"
+      loop_control:
+        loop_var: vm_name
+        label: "Starting {{ vm_name }}"
+      vars:
+        vm_config: "{{ hostvars[vm_name] }}"
+      proxmox_kvm:
+        api_host: "{{ ansible_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ vm_config.proxmox_host }}"
+        vmid: "{{ vm_config.vm_id }}"
+        state: started
+
+- name: Wait for VMs to be ready
+  hosts: k3s_cluster
+  gather_facts: false
+  tasks:
+    - name: Wait for VM to be ready
+      wait_for:
+        host: "{{ ansible_host }}"
+        port: 22
+        delay: 10
+        timeout: 300
+        state: started
+        search_regex: "OpenSSH"
+      delegate_to: "localhost"
+    
+# - name: Configure base system requirements
+#   hosts: k3s_cluster
+#   become: true
+#   tasks:
+#     - name: Update package cache
+#       ansible.builtin.apt:
+#         update_cache: yes
+#         cache_valid_time: 3600
+      
+#     - name: Install required packages
+#       ansible.builtin.apt:
+#         name:
+#           - qemu-guest-agent
+#           - open-iscsi
+#           - nfs-common
+#           - linux-modules-extra-virtual
+#           - bridge-utils
+#           - nvme-cli
+
+#     - name: Load required kernel modules
+#       modprobe:
+#         name: "{{ item }}"
+#         state: present
+#       loop:
+#         - br_netfilter
+#         - overlay
+#         - iscsi_tcp
+#         - vfio_pci
+#         - uio_pci_generic
+#         - nvme-tcp
+
+#     - name: Persist kernel modules
+#       copy:
+#         dest: /etc/modules-load.d/k3s.conf
+#         content: |
+#           br_netfilter
+#           overlay
+#           iscsi_tcp
+#           vfio_pci
+#           uio_pci_generic
+#           nvme-tcp
+    
+#     - name: Configure huge pages for Longhorn
+#       sysctl:
+#         name: vm.nr_hugepages
+#         value: '1024'
+#         state: present
+#         sysctl_file: /etc/sysctl.d/longhorn.conf
+
+#     - name: Configure kernel peramaters for K3s
+#       sysctl:
+#         name: "{{ item }}"
+#         value: "1"
+#         state: present
+#         sysctl_file: /etc/sysctl.d/k3s.conf
+#       loop:
+#         - net.bridge.bridge-nf-call-iptables
+#         - net.bridge.bridge-nf-call-ip6tables
+#         - net.ipv4.ip_forward
+      

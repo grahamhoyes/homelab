@@ -1,0 +1,11 @@
+ansible_user: root
+network_bridge: vmbr0
+network_gateway: "192.168.2.1"
+netmask_cidr: 23
+proxmox_api_user: "root@pam"
+proxmox_api_token_id: "ansible-automation"
+proxmox_api_token_secret: "{{ vault_proxmox_api_token_secret }}"
+# PCI device 00:02.0 is the integrated Intel GPU on the Proxmox hosts
+proxmox_gpu_pci_id: "00:02.0"
+vm_default_password: "{{ vault_vm_default_password }}"
+cluster_name: "HoyesLab"

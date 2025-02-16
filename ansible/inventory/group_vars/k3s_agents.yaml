@@ -1,0 +1,7 @@
+# Default values for k3s_workers nodes. These can be overridden per node in inventory.yaml
+vm_cpu_cores: 4
+vm_memory_mb: 8192
+vm_disk_gb: 200
+netmask_cidr: 23
+
+# No default VLAN, must be specified per worker node
