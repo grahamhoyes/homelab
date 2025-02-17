@@ -3,3 +3,5 @@ vm_cpu_cores: 2
 vm_memory_mb: 2048
 vm_disk_gb: 50
 vlan_id: 20
+network_gateway: "192.168.20.1"
+netmask_cidr: 23

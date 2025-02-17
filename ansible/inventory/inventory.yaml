@@ -13,38 +13,36 @@ k3s_servers:
       ansible_host: 192.168.20.11
       proxmox_host: pve1
       vm_id: 201
-    k3s-control-plane-2:
-      ansible_host: 192.168.20.12
-      proxmox_host: pve2
-      vm_id: 202
-    k3s-control-plane-3:
-      ansible_host: 192.168.20.13
-      proxmox_host: pve3
-      vm_id: 203
+    # k3s-control-plane-2:
+    #   ansible_host: 192.168.20.12
+    #   proxmox_host: pve2
+    #   vm_id: 202
+    # k3s-control-plane-3:
+    #   ansible_host: 192.168.20.13
+    #   proxmox_host: pve3
+    #   vm_id: 203
 
 k3s_agents:
   hosts:
     k3s-worker-1:
       ansible_host: 192.168.20.21
-      netmask_cidr: 23
       proxmox_host: pve1
       vm_id: 211
-      vlan_id: 20
       gpu_type: UHD_730
-    k3s-worker-2:
-      ansible_host: 192.168.20.22
-      netmask_cidr: 23
-      proxmox_host: pve2
-      vm_id: 212
-      vlan_id: 20
-      gpu_type: UHD_630
-    k3s-worker-3:
-      ansible_host: 192.168.20.23
-      netmask_cidr: 23
-      proxmox_host: pve3
-      vm_id: 213
-      vlan_id: 20
-      gpu_type: UHD_630
+    # k3s-worker-2:
+    #   ansible_host: 192.168.20.22
+    #   netmask_cidr: 23
+    #   proxmox_host: pve2
+    #   vm_id: 212
+    #   vlan_id: 20
+    #   gpu_type: UHD_630
+    # k3s-worker-3:
+    #   ansible_host: 192.168.20.23
+    #   netmask_cidr: 23
+    #   proxmox_host: pve3
+    #   vm_id: 213
+    #   vlan_id: 20
+    #   gpu_type: UHD_630
 
 k3s_cluster:
   children:

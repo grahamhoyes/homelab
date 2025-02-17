@@ -1,5 +1,6 @@
 ansible_user: root
 proxmox_image_storage: graham-ds920
 proxmox_vm_storage: local-lvm
+proxmox_gpu_mapped_device: intel_igpu
 cloud_image_name: noble-server-cloudimg-amd64.img
 cloud_image_url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img

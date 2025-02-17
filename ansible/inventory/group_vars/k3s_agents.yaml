@@ -2,6 +2,6 @@
 vm_cpu_cores: 4
 vm_memory_mb: 8192
 vm_disk_gb: 200
+vlan_id: 20
+network_gateway: "192.168.20.1"
 netmask_cidr: 23
-
-# No default VLAN, must be specified per worker node

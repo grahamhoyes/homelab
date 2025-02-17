@@ -21,6 +21,14 @@ This set of playbooks configures Proxmox, creates a set of VMs, and installs a h
     ssh-copy-id root@192.168.2.30
     ```
 
+4. Configure [resource mapping](https://pve.proxmox.com/wiki/QEMU/KVM_Virtual_Machines#resource_mapping) for host iGPU devices for each node that has an iGPU.
+
+    1. Proxmox Datacenter > Resource Mappigns > PCI Devices > Add
+    2. For one node, select the device and give it a name
+        - For Intel iGPUs, I go with `intel_igpu` as the name. The PCI device ID is usually `00:02.0`.
+    3. A new tree view will appear under PCI Devices. Next to the name you specified, in the Actions column, click the `+` button to add a mapping for each remaining node.
+    4. If using a name other than `intel_igpu`, change the variable `proxmox_gpu_mapped_device` in [inventory/group_vars/proxmox.yaml](inventory/group_vars/proxmox.yaml).
+
 ## Configuring
 
 ### Inventory
@@ -49,7 +57,8 @@ ansible-vault edit inventory/group_vars/all/vault.yaml
 ```
 
 This file must contain the following fields:
-- `vault_proxmox_api_token_secret` Value of the proxmox API token
+- `vault_proxmox_api_token_secret`: Value of the proxmox API token
+- `vault_proxmox_root_password`: Password for the `root@pam` user. This is currently needed for importing cloud init disk images due to a limitation in the Proxmox API.
 - `vault_vm_default_password`: Password for the default user on created VMs. This can be whatever you want.
 
 To generate the proxmox API tokens from the Proxmox web GUI:
