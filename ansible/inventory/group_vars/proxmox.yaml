@@ -1,3 +1,5 @@
 ansible_user: root
-proxmox_image_storage: graham-ds920/template/iso/
-proxmox_template_storage: graham-ds920
+proxmox_image_storage: graham-ds920
+proxmox_vm_storage: local-lvm
+cloud_image_name: noble-server-cloudimg-amd64.img
+cloud_image_url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img

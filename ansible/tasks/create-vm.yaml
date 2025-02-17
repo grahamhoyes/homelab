@@ -1,0 +1,62 @@
+- name: Create VM {{ vm_config.inventory_hostname }}
+  register: vm_result
+  proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    node: "{{ inventory_hostname }}"
+    name: "{{ vm_config.inventory_hostname }}"
+    vmid: "{{ vm_config.vm_id }}"
+    description: "{{ cluster_name }} k3s {{ 'control plane' if vm_config.inventory_hostname in groups['k3s_servers'] else 'worker' }} node on vlan {{ vm_config.vlan_id }}"
+
+    # Hardware configuration
+    memory: "{{ vm_config.vm_memory_mb }}"
+    cores: "{{ vm_config.vm_cpu_cores }}"
+    hostpci:
+      # GPU passthrough if gpu_type is set
+      hostpci0: "{{ 'host=' + proxmox_gpu_pci_id + ',pcie=1' if vm_config.gpu_type is defined else omit }}"
+    machine: q35  # Necessary for GPU passthrough
+    serial:
+      serial0: socket
+    vga: "serial0"
+
+    # Disk configuration
+    virtio:
+      virtio0: "{{ proxmox_vm_storage }}:{{ vm_config.vm_disk_gb }}"
+    boot: order=scsi0
+    scsihw: virtio-scsi-pci
+    ide:
+      ide2: "{{ proxmox_vm_storage }}:cloudinit,format=raw"
+    scsi:
+      scsi0: "{{ proxmox_vm_storage }}:0,iothread=1,discard=on,import-from={{ proxmox_image_storage }}:iso/{{ cloud_image_name }},format=qcow2"
+
+    # Cloud-Init settings
+    net:
+      net0: "virtio,bridge={{ network_bridge }},tag={{ vm_config.vlan_id }}"
+    sshkeys: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    ipconfig:
+      ipconfig0: "ip={{ vm_config.ansible_host }}/{{ vm_config.netmask_cidr | default(netmask_cidr) }},gw={{ network_gateway }}"
+    ciuser: "{{ ansible_user }}"
+    cipassword: "{{ vm_default_password }}"
+
+- name: Resize {{ vm_config.inventory_hostname }} disk
+  community.general.proxmox_disk:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    vmid: "{{ vm_result.vmid }}"
+    disk: scsi0
+    size: "{{ vm_config.vm_disk_gb }}G"
+    state: resized
+
+- name: Start {{ vm_config.inventory_hostname }} VM
+  proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    node: "{{ inventory_hostname }}"
+    vmid: "{{ vm_result.vmid }}"
+    state: started
