@@ -4,10 +4,10 @@ This set of playbooks configures Proxmox, creates a set of VMs, and installs a h
 
 ## Prerequisites
 
-1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) on the host machine (where you'll be running the playbooks from, likely your workstation). Using pip is the easiest cross-platform way to get the latest version:
+1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) and required modules on the host machine (where you'll be running the playbooks from, likely your workstation). Using pip is the easiest cross-platform way to get the latest version:
 
     ```bash
-    pip install ansible
+    pip install ansible netaddr
     ```
 
 2. [Install the 1password CLI](https://developer.1password.com/docs/cli/get-started/). This is optional, but I use it in [vault-pass.sh](./vault-pass.sh) to fetch the password for ansible-vault.
@@ -46,6 +46,8 @@ The main inventory is in [inventory/inventory.yaml](inventory/inventory.yaml). T
 
 Various settings and defaults are in [inventory/group_vars](inventory/group_vars/), separated by resource type.
 
+Settings for k3s itself are in [vars/k3s.yaml](vars/k3s.yaml), as these can't be loaded until the VMs are created part way through the playbook.
+
 ### Secrets
 
 Secrets (API tokens, VM passwords, etc) are configured using `ansible-vault`. The vault file is in [inventory/group_vars/all/vault.yaml](inventory/group_vars/all/vault.yaml). As above, [vault-pass.sh](vault-pass.sh) fetches the encryption key for the vault from the 1password CLI.
@@ -60,6 +62,7 @@ This file must contain the following fields:
 - `vault_proxmox_api_token_secret`: Value of the proxmox API token
 - `vault_proxmox_root_password`: Password for the `root@pam` user. This is currently needed for importing cloud init disk images due to a limitation in the Proxmox API.
 - `vault_vm_default_password`: Password for the default user on created VMs. This can be whatever you want.
+- `vault_k3s_token`: Token for k3s nodes to communicate with.
 
 To generate the proxmox API tokens from the Proxmox web GUI:
 1. Navigate to Datacenter > Permissions > API Tokens
@@ -95,8 +98,24 @@ This playbook will:
 > You won't be able to use monitors connected to the onboard GPU after Proxmox boots.
 
 
-### Provision VMs
+### Provision VMs and Install k3s
 
 ```bash
-ansible-playbook vm-provision.yaml
+ansible-playbook site.yaml
 ```
+
+This playbook will:
+- Download an Ubuntu cloud image
+- Create Proxmox VMs for k3s control plane and worker nodes
+- Install k3s
+
+This playbook uses [Techno Tim's k3s-ansible playbook](https://github.com/techno-tim/k3s-ansible) internally to configure HA k3s with kube-vip and MetalLB.
+
+
+### Reset VMs
+
+```bash
+ansible-playbook reset.yaml
+```
+
+This will completely delete the Proxmox VMs and associated disks, good for starting fresh.

@@ -1,0 +1,7 @@
+collections:
+  - name: ansible.utils
+  - name: community.general
+  - name: ansible.posix
+  - name: https://github.com/techno-tim/k3s-ansible.git
+    type: git
+    version: master

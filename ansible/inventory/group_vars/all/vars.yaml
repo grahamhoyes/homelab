@@ -1,7 +1,10 @@
+k3s_version: v1.32.1+k3s1
+
+# The user that gets SSH access into the VMs
 ansible_user: root
-network_bridge: vmbr0
-proxmox_api_user: "root@pam"
-proxmox_api_token_id: "ansible-automation"
-proxmox_api_token_secret: "{{ vault_proxmox_api_token_secret }}"
-vm_default_password: "{{ vault_vm_default_password }}"
+
+# Cluster name, only used for display purposes
 cluster_name: "HoyesLab"
+
+# Timezone
+system_timezone: "America/Toronto"

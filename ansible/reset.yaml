@@ -1,0 +1,20 @@
+- name: Remove VMs
+  hosts: proxmox
+  gather_facts: true
+  tasks:
+    - name: Set fact for VMs on this host
+      set_fact:
+        vms_to_remove: >
+          {{
+            groups['k3s_cluster']
+            | map('extract', hostvars)
+            | selectattr('proxmox_host', 'eq', inventory_hostname)
+            | list
+          }}
+
+    - name: Remove VM
+      loop: "{{ vms_to_remove }}"
+      loop_control:
+        loop_var: vm_config
+        label: "Removing {{ vm_config.inventory_hostname }}"
+      include_tasks: tasks/remove-vm.yaml

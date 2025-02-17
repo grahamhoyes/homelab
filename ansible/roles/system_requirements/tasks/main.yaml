@@ -1,0 +1,41 @@
+- name: Update package cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - qemu-guest-agent
+      - open-iscsi
+      - nfs-common
+      - bridge-utils
+      - nvme-cli
+
+- name: Load required kernel modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - br_netfilter
+    - overlay
+    - iscsi_tcp
+    - vfio_pci
+    # - uio_pci_generic
+    # - nvme-tcp
+
+- name: Persist kernel modules
+  copy:
+    dest: /etc/modules-load.d/k3s.conf
+    content: |
+      br_netfilter
+      overlay
+      iscsi_tcp
+      vfio_pci
+
+- name: Configure huge pages for Longhorn
+  sysctl:
+    name: vm.nr_hugepages
+    value: '1024'
+    state: present
+    sysctl_file: /etc/sysctl.d/longhorn.conf

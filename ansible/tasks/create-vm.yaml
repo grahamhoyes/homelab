@@ -1,6 +1,6 @@
 - name: Create VM {{ vm_config.inventory_hostname }}
   register: vm_result
-  proxmox_kvm:
+  community.general.proxmox_kvm:
     api_host: "{{ ansible_host }}"
     api_user: "{{ proxmox_api_user }}"
     api_token_id: "{{ proxmox_api_token_id }}"
@@ -22,9 +22,9 @@
     bios: ovmf
 
     # Disk configuration
-    virtio:
-      virtio0: "{{ proxmox_vm_storage }}:{{ vm_config.vm_disk_gb }}"
-    boot: order=scsi0
+    # virtio:
+    #   virtio0: "{{ proxmox_vm_storage }}:{{ vm_config.vm_disk_gb }}"
+    boot: order=virtio0
     scsihw: virtio-scsi-pci
     ide:
       ide2: "{{ proxmox_vm_storage }}:cloudinit,format=raw"
@@ -58,10 +58,10 @@
     api_password: "{{ vault_proxmox_root_password }}"
     vmid: "{{ vm_result.vmid }}"
     import_from: "/mnt/pve/{{ proxmox_image_storage }}/template/iso/{{ cloud_image_name }}"
-    disk: scsi0
+    disk: virtio0
     storage: "{{ proxmox_vm_storage }}"
     discard: "on"
-    ssd: true
+    # ssd: true
 
 
 
@@ -72,12 +72,12 @@
     api_token_id: "{{ proxmox_api_token_id }}"
     api_token_secret: "{{ proxmox_api_token_secret }}"
     vmid: "{{ vm_result.vmid }}"
-    disk: scsi0
+    disk: virtio0
     size: "{{ vm_config.vm_disk_gb }}G"
     state: resized
 
 - name: Start {{ vm_config.inventory_hostname }} VM
-  proxmox_kvm:
+  community.general.proxmox_kvm:
     api_host: "{{ ansible_host }}"
     api_user: "{{ proxmox_api_user }}"
     api_token_id: "{{ proxmox_api_token_id }}"

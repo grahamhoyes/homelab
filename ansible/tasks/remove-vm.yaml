@@ -1,0 +1,22 @@
+- name: Stop VM {{ vm_config.inventory_hostname }}
+  community.general.proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    node: "{{ inventory_hostname }}"
+    name: "{{ vm_config.inventory_hostname }}"
+    vmid: "{{ vm_config.vm_id }}"
+    state: stopped
+    force: true
+
+- name: Remove VM {{ vm_config.inventory_hostname }}
+  community.general.proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    node: "{{ inventory_hostname }}"
+    name: "{{ vm_config.inventory_hostname }}"
+    vmid: "{{ vm_config.vm_id }}"
+    state: absent

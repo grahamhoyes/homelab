@@ -2,47 +2,50 @@ proxmox:
   hosts:
     pve1:
       ansible_host: 192.168.2.30
-    # pve2:
-    #   ansible_host: 192.168.2.31
-    # pve3:
-    #   ansible_host: 192.168.2.32
+    pve2:
+      ansible_host: 192.168.2.31
+    pve3:
+      ansible_host: 192.168.2.32
 
 k3s_servers:
   hosts:
     k3s-control-plane-1:
       ansible_host: 192.168.20.11
       proxmox_host: pve1
-      vm_id: 201
-    # k3s-control-plane-2:
-    #   ansible_host: 192.168.20.12
-    #   proxmox_host: pve2
-    #   vm_id: 202
-    # k3s-control-plane-3:
-    #   ansible_host: 192.168.20.13
-    #   proxmox_host: pve3
-    #   vm_id: 203
+      vm_id: 211
+    k3s-control-plane-2:
+      ansible_host: 192.168.20.12
+      proxmox_host: pve2
+      vm_id: 212
+    k3s-control-plane-3:
+      ansible_host: 192.168.20.13
+      proxmox_host: pve3
+      vm_id: 213
 
 k3s_agents:
   hosts:
     k3s-worker-1:
       ansible_host: 192.168.20.21
       proxmox_host: pve1
-      vm_id: 211
+      vm_id: 221
       gpu_type: UHD_730
-    # k3s-worker-2:
-    #   ansible_host: 192.168.20.22
-    #   netmask_cidr: 23
-    #   proxmox_host: pve2
-    #   vm_id: 212
-    #   vlan_id: 20
-    #   gpu_type: UHD_630
-    # k3s-worker-3:
-    #   ansible_host: 192.168.20.23
-    #   netmask_cidr: 23
-    #   proxmox_host: pve3
-    #   vm_id: 213
-    #   vlan_id: 20
-    #   gpu_type: UHD_630
+    k3s-worker-2:
+      ansible_host: 192.168.20.22
+      netmask_cidr: 23
+      proxmox_host: pve2
+      vm_id: 222
+      vlan_id: 20
+      gpu_type: UHD_630
+    k3s-worker-3:
+      ansible_host: 192.168.20.23
+      netmask_cidr: 23
+      proxmox_host: pve3
+      vm_id: 223
+      vlan_id: 20
+      gpu_type: UHD_630
+      # pve3 is slightly more powerful, so have some extra resources
+      vm_cpu_cores: 8
+      vm_memory_mb: 16384
 
 k3s_cluster:
   children:
