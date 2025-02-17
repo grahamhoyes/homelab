@@ -9,6 +9,10 @@
     name: "{{ vm_config.inventory_hostname }}"
     vmid: "{{ vm_config.vm_id }}"
     description: "{{ cluster_name }} k3s {{ 'control plane' if vm_config.inventory_hostname in groups['k3s_servers'] else 'worker' }} node on vlan {{ vm_config.vlan_id }}"
+    tags:
+      - "{{ 'k3s-control-plane' if vm_config.inventory_hostname in groups['k3s_servers'] else 'k3s-worker' }}"
+      - "k3s"
+      - "{{ cluster_name | lower }}"
 
     # Hardware configuration
     memory: "{{ vm_config.vm_memory_mb }}"
@@ -35,8 +39,8 @@
       pre_enrolled_keys: false
 
     # See below, importing images from storage locations isn't supported yet
-    # scsi:
-    #   scsi0: "{{ proxmox_vm_storage }}:0,iothread=1,discard=on,ssd=1,import-from={{ proxmox_image_storage }}:iso/{{ cloud_image_name }},format=qcow2"
+    # virtio:
+    #   virtio0: "{{ proxmox_vm_storage }}:0,iothread=1,discard=on,import-from={{ proxmox_image_storage }}:iso/{{ cloud_image_name }},format=qcow2"
 
     # Cloud-Init settings
     net:
@@ -50,7 +54,7 @@
 # This task has to run as the root user, not an API token, in order to use an absolute path for disk import.
 # Importing qcow2 images through the API isn't supported yet. Follow this thread:
 # https://forum.proxmox.com/threads/import-disk-from-file-using-api.93393/
-# Once importing images is supported, remove this block and uncomment the scsi0 line above.
+# Once importing images is supported, remove this block and uncomment the virtio0 line above.
 - name: Attach {{ vm_config.inventory_hostname }} cloud image disk
   community.general.proxmox_disk:
     api_host: "{{ ansible_host }}"
@@ -61,9 +65,6 @@
     disk: virtio0
     storage: "{{ proxmox_vm_storage }}"
     discard: "on"
-    # ssd: true
-
-
 
 - name: Resize {{ vm_config.inventory_hostname }} disk
   community.general.proxmox_disk:

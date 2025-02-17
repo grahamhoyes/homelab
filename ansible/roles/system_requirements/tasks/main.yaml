@@ -11,6 +11,7 @@
       - nfs-common
       - bridge-utils
       - nvme-cli
+      - "linux-modules-extra-{{ ansible_kernel }}"
 
 - name: Load required kernel modules
   modprobe:
@@ -21,8 +22,7 @@
     - overlay
     - iscsi_tcp
     - vfio_pci
-    # - uio_pci_generic
-    # - nvme-tcp
+    - i915
 
 - name: Persist kernel modules
   copy:
@@ -32,6 +32,7 @@
       overlay
       iscsi_tcp
       vfio_pci
+      i915
 
 - name: Configure huge pages for Longhorn
   sysctl:
