@@ -76,6 +76,15 @@
     - role: techno_tim.k3s_ansible.k3s_server_post
       become: true
 
+- name: Reboot k3s cluster nodes
+  hosts: k3s_cluster
+  gather_facts: false
+  tasks:
+    - name: Rebooting {{ inventory_hostname }}
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+        msg: "Reboot initiated by Ansible for k3s cluster"
+
 - name: Storing kubeconfig in the playbook directory
   hosts: k3s_servers[0]
   tasks:

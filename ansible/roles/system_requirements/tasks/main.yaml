@@ -40,3 +40,24 @@
     value: '1024'
     state: present
     sysctl_file: /etc/sysctl.d/longhorn.conf
+
+- name: Start iscsid service
+  ansible.builtin.systemd:
+    name: iscsid
+    state: started
+    enabled: yes
+
+# See https://longhorn.io/kb/troubleshooting-volume-with-multipath/
+- name: Stop and disable multipathd service
+  ansible.builtin.systemd:
+    name: multipathd
+    state: stopped
+    enabled: no
+
+- name: Add multipathd blacklist configuration
+  ansible.builtin.blockinfile:
+    path: /etc/multipath.conf
+    block: |
+      blacklist {
+          devnode "^sd[a-z0-9]+"
+      }
