@@ -13,6 +13,7 @@
       - "{{ 'k3s-control-plane' if vm_config.inventory_hostname in groups['k3s_servers'] else 'k3s-worker' }}"
       - "k3s"
       - "{{ cluster_name | lower }}"
+    onboot: true
 
     # Hardware configuration
     memory: "{{ vm_config.vm_memory_mb }}"
