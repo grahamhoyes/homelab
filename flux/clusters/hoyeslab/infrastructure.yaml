@@ -12,3 +12,18 @@ spec:
     name: flux-system
   dependsOn:
     - name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-configs
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./flux/infrastructure/configs
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: infrastructure-controllers
