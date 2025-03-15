@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  namespace: media
+  labels:
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/instance: jellyfin
+spec:
+  strategy:
+    type: RollingUpdate
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jellyfin
+      app.kubernetes.io/instance: jellyfin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: jellyfin
+        app.kubernetes.io/instance: jellyfin
+    spec:
+      serviceAccountName: jellyfin
+      containers:
+        - name: jellyfin
+          image: ghcr.io/linuxserver/jellyfin:10.10.6
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8096
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: 10
+            tcpSocket:
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 10
+            tcpSocket:
+              port: http
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /data/media
+              name: media
+            - mountPath: /cache
+              name: cache
+            - mountPath: /dev/dri
+              name: hwa
+          env:
+            - name: PUID
+              value: ${quote}${NFS_UID}${quote}
+            - name: PGID
+              value: ${quote}${NFS_GID}${quote}
+            - name: TZ
+              value: "America/Toronto"
+            - name: UMASK
+              value: "022"
+            - name: DOCKER_MODS
+              value: "linuxserver/mods:jellyfin-opencl-intel-25.09.32961.5"
+            - name: JELLYFIN_CACHE_DIR
+              value: /cache
+
+      volumes:
+        # Config volume is a PVC, replicated with Longhorn
+        - name: config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+        # Media volume is an NFS share
+        - name: media
+          nfs:
+            server: ds920.hoyes.dev
+            path: /volume1/media
+        # Cache volume is an emptyDir
+        - name: cache
+          emptyDir: {}
+        # Hardware acceleration
+        - name: hwa
+          hostPath:
+            path: /dev/dri
+
+      nodeSelector:
+        gpu.hoyes.dev/type: "UHD_730"

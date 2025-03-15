@@ -1,0 +1,19 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./flux/apps/hoyeslab
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: infrastructure-configs
+  postBuild:
+    substitute:
+      quote: '"'       # https://fluxcd.io/flux/components/kustomize/kustomizations/#post-build-substitution-of-numbers-and-booleans
+      NFS_UID: "1029"  # service-access user on Graham-DS920 NFS server
+      NFS_GID: "100"   # users group on Graham-DS920 NFS server
