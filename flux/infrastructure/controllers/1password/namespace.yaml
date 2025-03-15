@@ -3,4 +3,3 @@ kind: Namespace
 metadata:
   name: 1password
   namespace: flux-system
-

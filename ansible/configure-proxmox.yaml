@@ -13,7 +13,7 @@
         update_cache: true
         cache_valid_time: 3600
         name: python3-proxmoxer
-    
+
     - name: Confirm configure GPU passthrough
       pause:
         prompt: |
