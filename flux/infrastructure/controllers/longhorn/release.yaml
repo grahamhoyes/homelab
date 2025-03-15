@@ -16,6 +16,12 @@ spec:
         name: longhorn
         namespace: flux-system
   values:
+    defaultSettings:
+      # Mount point within the node where Longhorn stores data. This is created
+      # by the ansible playbooks.
+      # If not running in a VM with a dedicated mount, use a Kustomize patch to set this
+      # back to /var/lib/longhorn/
+      defaultDataPath: "/mnt/longhorn-storage/"
     ingress:
       enabled: true
       tls: true

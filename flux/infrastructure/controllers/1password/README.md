@@ -8,10 +8,8 @@ The Connect server and operator require a credentials file and token respectivel
 # This will create 1password-credentials.json. DO NOT COMMIT IT
 op connect server create hoyeslab --vaults infrastructure
 
-# Create a token. You should probably echo this and save it to 1password.
-export OP_CONNECT_TOKEN=$(op connect token create hoyeslab --server hoyeslab --vault infrastructure)
-
-echo $OP_CONNECT_TOKEN
+# Create a token. Save it to 1password.
+op connect token create hoyeslab --server hoyeslab --vault infrastructure
 ```
 
 Save the created `1password-credentials.json` file and created token to 1password just in case. **Do not commit the `1password-credentials.json`** file.
@@ -19,14 +17,19 @@ Save the created `1password-credentials.json` file and created token to 1passwor
 We can now put these into the cluster:
 
 ```bash
-# Create the namespace
+# Create the namespace. If this cluster is already bootstrapped with configs, this will already exist.
 kubectl apply -f namespace.yaml
+
+# 1Password vault and item name with the saved token and config file
+CONNECT_ITEM_PATH="op://infrastructure/1Password Connect Token"
 
 # Create a secret from the credentials file, which needs to be base64 encoded
 kubectl create secret generic op-credentials \
   --namespace 1password \
-  --from-literal=1password-credentials.json=$(cat 1password-credentials.json | base64 --wrap=0)
+  --from-literal=1password-credentials.json=$(op read "${CONNECT_ITEM_PATH}/1password-credentials.json" | base64 --wrap=0)
 
 # Create a secret for the token
-kubectl create secret generic onepassword-token --from-literal=token=${OP_CONNECT_TOKEN} --namespace=1password
+kubectl create secret generic onepassword-token \
+  --namespace 1password \
+  --from-literal=token=$(op read "${CONNECT_ITEM_PATH}/credential")
 ```

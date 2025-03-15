@@ -38,6 +38,24 @@
         label: "Creating {{ vm_config.inventory_hostname }}"
       include_tasks: tasks/create-vm.yaml
 
+- name: Configure storage disks
+  hosts: k3s_agents
+  gather_facts: true
+  tasks:
+    - name: Format Longhorn disk with XFS
+      community.general.filesystem:
+        fstype: xfs
+        dev: /dev/vdb
+
+    - name: Configure Longhorn mount
+      ansible.posix.mount:
+        path: /mnt/longhorn-storage
+        src: /dev/vdb
+        fstype: xfs
+        opts: defaults
+        state: mounted
+
+
 # Variables must be loaded now rather than as part of group_vars since they depend
 # on the results of the previous tasks (VM creation in particular)
 - name: Include k3s variables

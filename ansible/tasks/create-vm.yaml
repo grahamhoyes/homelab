@@ -56,7 +56,7 @@
 # Importing qcow2 images through the API isn't supported yet. Follow this thread:
 # https://forum.proxmox.com/threads/import-disk-from-file-using-api.93393/
 # Once importing images is supported, remove this block and uncomment the virtio0 line above.
-- name: Attach {{ vm_config.inventory_hostname }} cloud image disk
+- name: Attach {{ vm_config.inventory_hostname }} cloud image root disk
   community.general.proxmox_disk:
     api_host: "{{ ansible_host }}"
     api_user: "{{ proxmox_api_user }}"
@@ -67,7 +67,7 @@
     storage: "{{ proxmox_vm_storage }}"
     discard: "on"
 
-- name: Resize {{ vm_config.inventory_hostname }} disk
+- name: Resize {{ vm_config.inventory_hostname }} root disk
   community.general.proxmox_disk:
     api_host: "{{ ansible_host }}"
     api_user: "{{ proxmox_api_user }}"
@@ -77,6 +77,19 @@
     disk: virtio0
     size: "{{ vm_config.vm_disk_gb }}G"
     state: resized
+
+- name: Attach {{ vm_config.inventory_hostname }} Longhorn storage disk
+  when: vm_config.inventory_hostname in groups['k3s_agents']
+  community.general.proxmox_disk:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    vmid: "{{ vm_result.vmid }}"
+    disk: virtio1
+    size: "{{ vm_config.longhorn_disk_gb }}"
+    storage: "{{ proxmox_vm_storage }}"
+    format: raw
 
 - name: Start {{ vm_config.inventory_hostname }} VM
   community.general.proxmox_kvm:
