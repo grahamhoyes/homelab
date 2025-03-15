@@ -22,4 +22,5 @@ spec:
       host: longhorn.hoyes.dev
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt
-      secretName: longhorn-tls
+      tlsSecret: longhorn-tls
+      ingressClassName: nginx
