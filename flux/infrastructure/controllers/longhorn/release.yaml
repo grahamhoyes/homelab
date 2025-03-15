@@ -5,6 +5,7 @@ metadata:
   namespace: longhorn-system
 spec:
   releaseName: longhorn
+  interval: 10m
   chart:
     spec:
       chart: longhorn
@@ -14,4 +15,11 @@ spec:
         kind: HelmRepository
         name: longhorn
         namespace: flux-system
-  interval: 10m
+  values:
+    ingress:
+      enabled: true
+      tls: true
+      host: longhorn.hoyes.dev
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+      secretName: longhorn-tls
