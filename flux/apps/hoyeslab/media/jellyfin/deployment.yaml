@@ -25,27 +25,22 @@ spec:
         - name: jellyfin
           image: ghcr.io/linuxserver/jellyfin:10.10.6
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              gpu.intel.com/i915: "1"
+            limits:
+              gpu.intel.com/i915: "1"
           ports:
             - name: http
               containerPort: 8096
               protocol: TCP
-          livenessProbe:
-            initialDelaySeconds: 10
-            tcpSocket:
-              port: http
-          readinessProbe:
-            initialDelaySeconds: 10
-            tcpSocket:
-              port: http
           volumeMounts:
             - mountPath: /config
-              name: config
+              name: jellyfin-config
+            - mountPath: /config/transcodes
+              name: jellyfin-transcode
             - mountPath: /data/media
-              name: media
-            - mountPath: /cache
-              name: cache
-            - mountPath: /dev/dri
-              name: hwa
+              name: jellyfin-media
           env:
             - name: PUID
               value: ${quote}${NFS_UID}${quote}
@@ -57,31 +52,31 @@ spec:
               value: "022"
             - name: DOCKER_MODS
               value: "linuxserver/mods:jellyfin-opencl-intel"
-            - name: JELLYFIN_CACHE_DIR
-              value: /cache
-          securityContext:
-            capabilities:
-              add:
-                - "SYS_ADMIN"
-            privileged: false
+          livenessProbe:
+            initialDelaySeconds: 10
+            tcpSocket:
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 10
+            tcpSocket:
+              port: http
 
       volumes:
         # Config volume is a PVC, replicated with Longhorn
-        - name: config
+        - name: jellyfin-config
           persistentVolumeClaim:
             claimName: jellyfin-config
         # Media volume is an NFS share
-        - name: media
+        - name: jellyfin-media
           nfs:
             server: ds920.hoyes.dev
             path: /volume1/media
-        # Cache volume is an emptyDir
-        - name: cache
+        # Transcode volume is an emptyDir. Could make in-memory if desired.
+        - name: jellyfin-transcode
           emptyDir: {}
-        # Hardware acceleration
-        - name: hwa
-          hostPath:
-            path: /dev/dri
 
       nodeSelector:
         gpu.hoyes.dev/type: "UHD_730"
+        # Technically redundant with the above, but makes sure that the deployment fails
+        # if something is wrong with the intel device plugins
+        intel.feature.node.kubernetes.io/gpu: "true"
