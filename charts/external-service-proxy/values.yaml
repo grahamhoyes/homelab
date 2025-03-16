@@ -8,11 +8,11 @@ ingress:
     # If services need their own certificate, use `$service.tlsSecret`.
     secretName: chart-example-tls
 
-services:
-  myservice:
-    ip: "192.168.1.1"
-    port: 80
-    domain: "myservice.chart-example.local"
-    protocol: TCP
-    tlsSecret: ""
-    ingressAnnotations: {}
+services: {}
+  # myservice:
+  #   ip: "192.168.1.1"
+  #   port: 80
+  #   domain: "myservice.chart-example.local"
+  #   protocol: TCP
+  #   tlsSecret: ""
+  #   ingressAnnotations: {}
