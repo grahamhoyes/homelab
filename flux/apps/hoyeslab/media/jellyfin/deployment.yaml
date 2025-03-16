@@ -8,7 +8,9 @@ metadata:
     app.kubernetes.io/instance: jellyfin
 spec:
   strategy:
-    type: RollingUpdate
+    # Because of the GPU resource request and nodeSelector limiting us to a single node,
+    # we need to release the old pod before creating the new one.
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
