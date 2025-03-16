@@ -1,0 +1,22 @@
+# homelab-private repo that is structured very similarily to this one
+---
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
+metadata:
+  name: homelab-private-key
+  namespace: flux-system
+spec:
+  itemPath: "vaults/infrastructure/items/homelab-private SSH Key"
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: homelab-private
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+  secretRef:
+    name: homelab-private-key
+  url: ssh://git@github.com/grahamhoyes/homelab-private
