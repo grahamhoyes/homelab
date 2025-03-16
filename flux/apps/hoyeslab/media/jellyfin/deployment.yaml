@@ -29,7 +29,7 @@ spec:
           imagePullPolicy: IfNotPresent
           resources:
             requests:
-              gpu.intel.com/i915: "1"
+              gpu.intel.com/i915: "500m"
             limits:
               gpu.intel.com/i915: "1"
           ports:
