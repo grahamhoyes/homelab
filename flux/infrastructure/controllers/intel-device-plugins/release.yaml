@@ -1,0 +1,38 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: device-plugin-operator
+  namespace: inteldeviceplugins-system
+spec:
+  releaseName: device-plugin-operator
+  interval: 10m
+  chart:
+    spec:
+      chart: intel-device-plugins-operator
+      version: 0.32.0
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: intel
+        namespace: flux-system
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: device-plugins-gpu
+  namespace: inteldeviceplugins-system
+spec:
+  releaseName: device-plugins-gpu
+  interval: 10m
+  chart:
+    spec:
+      chart: intel-device-plugins-gpu
+      version: 0.32.0
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: intel
+        namespace: flux-system
+  values:
+    sharedDevNum: 6        # Number of pods that can share a single GPU
+    nodeFeatureRule: true  # Add node feature discovery rule

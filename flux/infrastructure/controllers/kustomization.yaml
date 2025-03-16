@@ -6,3 +6,5 @@ resources:
   - longhorn/
   - ingress-nginx/
   - cert-manager/
+  - node-feature-discovery/
+  - intel-device-plugins/
