@@ -34,7 +34,5 @@ spec:
         name: intel
         namespace: flux-system
   values:
-    # See https://github.com/intel/intel-device-plugins-for-kubernetes/blob/main/cmd/gpu_plugin/README.md
     sharedDevNum: 6        # Number of pods that can share a single GPU
     nodeFeatureRule: true  # Add node feature discovery rule
-    resourceManager: true  # Fractional resource masagement
