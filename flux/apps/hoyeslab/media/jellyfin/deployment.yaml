@@ -59,6 +59,11 @@ spec:
               value: "linuxserver/mods:jellyfin-opencl-intel"
             - name: JELLYFIN_CACHE_DIR
               value: /cache
+          securityContext:
+            capabilities:
+              add:
+                - "SYS_ADMIN"
+            privileged: false
 
       volumes:
         # Config volume is a PVC, replicated with Longhorn
