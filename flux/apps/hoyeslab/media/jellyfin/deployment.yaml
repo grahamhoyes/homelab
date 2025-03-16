@@ -8,9 +8,7 @@ metadata:
     app.kubernetes.io/instance: jellyfin
 spec:
   strategy:
-    # Because of the GPU resource request and nodeSelector limiting us to a single node,
-    # we need to release the old pod before creating the new one.
-    type: Recreate
+    type: RollingUpdate
   replicas: 1
   selector:
     matchLabels:
@@ -30,8 +28,12 @@ spec:
           resources:
             requests:
               gpu.intel.com/i915: "1"
+              cpu: "2000m"
+              memory: "2Gi"
             limits:
               gpu.intel.com/i915: "1"
+              cpu: "4000m"
+              memory: "6Gi"
           ports:
             - name: http
               containerPort: 8096
@@ -39,7 +41,7 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: jellyfin-config
-            - mountPath: /config/transcodes
+            - mountPath: /config/cache/transcodes
               name: jellyfin-transcode
             - mountPath: /data/media
               name: jellyfin-media
