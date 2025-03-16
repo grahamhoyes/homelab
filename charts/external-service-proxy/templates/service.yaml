@@ -1,0 +1,16 @@
+{{- range $name, $service := .Values.services }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "external-service-proxy.fullname" $ }}-{{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "external-service-proxy.labels" $ | nindent 4 }}
+spec:
+  ports:
+    - port: 80
+      name: http
+      targetPort: http
+      protocol: {{ $service.protocol | default "TCP" }}
+{{- end }}

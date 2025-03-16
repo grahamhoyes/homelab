@@ -96,3 +96,20 @@ spec:
         - myservice.hoyes.dev
       secretName: hoyes-dev-tls
 ```
+
+## Helm Chart
+
+For convienence, I wrapped all of this into the [external-service-proxy helm chart](/charts/external-service-proxy/). The above example can be configured by supplying these values:
+
+```yaml
+services:
+  myservice:
+    ip: 192.168.1.2
+    port: 1234
+    domain: myservice.hoyes.dev
+
+ingress:
+  className: nginx
+  tls:
+    secretName: hoyes-dev-tls
+```

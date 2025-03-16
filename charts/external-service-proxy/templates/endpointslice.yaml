@@ -1,0 +1,19 @@
+{{- range $name, $service := .Values.services }}
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: {{ include "external-service-proxy.fullname" $ }}-{{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "external-service-proxy.labels" $ | nindent 4 }}
+    kubernetes.io/service-name: {{ include "external-service-proxy.fullname" $ }}-{{ $name }}
+addressType: {{  $service.addressType | default "IPv4" }}
+ports:
+  - name: http
+    protocol: {{ $service.protocol | default "TCP" }}
+    port: {{ $service.port }}
+endpoints:
+  - addresses:
+      - {{ $service.ip }}
+{{- end }}
