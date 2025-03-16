@@ -28,11 +28,11 @@ spec:
           resources:
             requests:
               gpu.intel.com/i915: "1"
-              cpu: "2000m"
-              memory: "2Gi"
+              cpu: "4000m"
+              memory: "4Gi"
             limits:
               gpu.intel.com/i915: "1"
-              cpu: "4000m"
+              cpu: "6000m"
               memory: "6Gi"
           ports:
             - name: http

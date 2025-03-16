@@ -44,7 +44,7 @@ k3s_agents:
       vlan_id: 20
       gpu_type: UHD_630
       # pve3 is slightly more powerful, so take some extra resources
-      vm_cpu_cores: 8
+      vm_cpu_cores: 10
       vm_memory_mb: 16384
 
 k3s_cluster:

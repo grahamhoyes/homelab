@@ -1,6 +1,6 @@
 # Default values for k3s_workers nodes. These can be overridden per node in inventory.yaml
-vm_cpu_cores: 4
-vm_memory_mb: 8192
+vm_cpu_cores: 6
+vm_memory_mb: 16384
 vm_disk_gb: 50
 longhorn_disk_gb: 200
 vlan_id: 20
