@@ -21,4 +21,4 @@ flux bootstrap github \
   --author-email <optional email address>
 ```
 
-After bootstrapping, a secret for 1Password must also be added to the cluster. Follow the readme in [infrastructure/controllers/1password/](infrastructure/controllers/1password/).
+After bootstrapping, a secret for 1Password must also be added to the cluster. Follow the readme in [infrastructure/foundation/1password/](infrastructure/foundation/1password/).
