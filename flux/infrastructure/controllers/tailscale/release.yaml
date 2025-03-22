@@ -16,3 +16,10 @@ spec:
         name: tailscale
         namespace: flux-system
   values:
+    operatorConfig:
+      hostname: ${CLUSTER_NAME}-operator
+      image:
+        repository: ghcr.io/tailscale/k8s-operator
+    proxyConfig:
+      image:
+        repository: ghcr.io/tailscale/tailscale

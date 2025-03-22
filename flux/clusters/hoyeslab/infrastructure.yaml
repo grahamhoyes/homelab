@@ -27,6 +27,9 @@ spec:
     name: flux-system
   dependsOn:
     - name: infrastructure-foundation
+  postBuild:
+    substitute:
+      CLUSTER_NAME: "hoyeslab"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
