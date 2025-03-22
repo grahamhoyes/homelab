@@ -7,3 +7,4 @@ resources:
   - cert-manager/
   - node-feature-discovery/
   - intel-device-plugins/
+  - tailscale/
