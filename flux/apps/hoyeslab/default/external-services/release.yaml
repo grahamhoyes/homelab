@@ -20,6 +20,8 @@ spec:
         ip: 192.168.2.6
         port: 80
         domain: octopi.hoyes.dev
+        ingressAnnotations:
+          nginx.ingress.kubernetes.io/proxy-body-size: 500m
       homeassistant:
         ip: 192.168.2.7
         port: 8123
