@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wallos
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: wallos
+    app.kubernetes.io/instance: wallos
+  ports:
+    - targetPort: http
+      name: http
+      port: 80

@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wallos
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: wallos.hoyes.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wallos
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - wallos.hoyes.dev
+      secretName: hoyes-dev-tls
