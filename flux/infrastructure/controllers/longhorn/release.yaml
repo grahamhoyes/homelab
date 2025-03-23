@@ -22,6 +22,8 @@ spec:
       # If not running in a VM with a dedicated mount, use a Kustomize patch to set this
       # back to /var/lib/longhorn/
       defaultDataPath: "/mnt/longhorn-storage/"
+    defaultBackupStore:
+      backupTarget: "nfs://ds920.hoyes.dev:/volume1/backups/longhorn"
     ingress:
       enabled: true
       tls: true
