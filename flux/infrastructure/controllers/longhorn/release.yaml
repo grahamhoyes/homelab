@@ -23,6 +23,9 @@ spec:
       # back to /var/lib/longhorn/
       defaultDataPath: "/mnt/longhorn-storage/"
     defaultBackupStore:
+      # Note: Longhorn, for whatever reason, makes connections from unprivileged ports (unlike
+      # regular kubernetes NFS volumes). On the NFS Permissions for the share on Synology,
+      # need to enable "Allow connections from non-privileged ports".
       backupTarget: "nfs://ds920.hoyes.dev:/volume1/backups/longhorn"
     ingress:
       enabled: true
