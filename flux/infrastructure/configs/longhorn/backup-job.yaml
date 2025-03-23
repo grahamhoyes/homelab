@@ -1,0 +1,13 @@
+apiVersion: longhorn.io/v1beta1
+kind: RecurringJob
+metadata:
+  name: weekly-backup
+  namespace: longhorn-system
+spec:
+  cron: "0 0 * * 0"  # Sunday at midnight
+  task: "backup"
+  groups:
+  - default
+  # ~2 months. Can still be restored after that from NAS backups.
+  retain: 18
+  concurrency: 2
