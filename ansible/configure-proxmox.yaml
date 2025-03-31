@@ -14,6 +14,33 @@
         cache_valid_time: 3600
         name: python3-proxmoxer
 
+    - name: Create Tailscale IP forwarding config
+      ansible.builtin.copy:
+        dest: /etc/sysctl.d/99-tailscale.conf
+        content: |
+          net.ipv4.ip_forward = 1
+          net.ipv6.conf.all.forwarding = 1
+        mode: '0644'
+      notify: apply tailscale sysctl changes
+
+    - name: Create systemd service for CPU powersave mode
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/cpu-powersave.service
+        content: |
+          [Unit]
+          Description=Set CPU scaling governor to powersave
+          After=multi-user.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/bin/sh -c 'echo "powersave" | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor'
+          RemainAfterExit=yes
+
+          [Install]
+          WantedBy=multi-user.target
+        mode: '0644'
+      notify: enable cpu-powersave service
+
     - name: Confirm configure GPU passthrough
       pause:
         prompt: |
@@ -57,6 +84,17 @@
       notify: update initramfs
 
   handlers:
+    - name: apply tailscale sysctl changes
+      ansible.builtin.command: sysctl -p /etc/sysctl.d/99-tailscale.conf
+      changed_when: true
+
+    - name: enable cpu-powersave service
+      ansible.builtin.systemd:
+        name: cpu-powersave.service
+        enabled: yes
+        daemon_reload: yes
+        state: started
+
     - name: update grub
       shell: update-grub
       notify: reboot server
