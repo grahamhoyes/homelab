@@ -24,7 +24,7 @@ spec:
       serviceAccountName: jellyfin
       containers:
         - name: jellyfin
-          image: ghcr.io/linuxserver/jellyfin:10.10.6
+          image: ghcr.io/linuxserver/jellyfin:10.10.7
           imagePullPolicy: IfNotPresent
           resources:
             requests:
