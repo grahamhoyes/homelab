@@ -15,4 +15,4 @@ spec:
         kind: HelmRepository
         name: node-feature-discovery
         namespace: flux-system
-  values:
+  values: {}

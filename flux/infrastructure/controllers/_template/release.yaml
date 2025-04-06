@@ -15,4 +15,4 @@ spec:
         kind: HelmRepository
         name: REPONAME
         namespace: flux-system
-  values:
+  values: {}
