@@ -2,12 +2,14 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    ":dependencyDashboard"
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":timezone(America/Toronto)"
   ],
-  "kubernetes": {
-    "fileMatch": ["flux/.+\\.yaml$"]
-  },
   "flux": {
-    "fileMatch": ["flux/.+\\.yaml$"]
+    "fileMatch": ["(^|/)flux/.+\\.ya?ml$"]
+  },
+  "kubernetes": {
+    "fileMatch": ["(^|/)flux/.+\\.ya?ml$"]
   }
 }
