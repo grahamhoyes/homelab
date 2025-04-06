@@ -9,7 +9,7 @@
   "flux": {
     "fileMatch": ["(^|/)flux/.+\\.ya?ml$"]
   },
-  // "kubernetes": {
-  //   "fileMatch": ["(^|/)flux/.+\\.ya?ml$"]
-  // }
+  "kubernetes": {
+    "fileMatch": ["(^|/)flux/.+\\.ya?ml$"]
+  }
 }
