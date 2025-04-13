@@ -58,13 +58,13 @@ spec:
               memory: 512Mi
           livenessProbe:
             httpGet:
-              path: /admin
+              path: /admin/login
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /admin
+              path: /admin/login
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10

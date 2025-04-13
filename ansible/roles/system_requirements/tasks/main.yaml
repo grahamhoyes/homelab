@@ -61,3 +61,19 @@
       blacklist {
           devnode "^sd[a-z0-9]+"
       }
+
+# Disable systemd-resolved DNS stub listener
+- name: Create systemd-resolved.conf.d directory
+  file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    mode: '0755'
+
+- name: Create resolved configuration file
+  copy:
+    dest: /etc/systemd/resolved.conf.d/disable-stub-listener.conf
+    content: |
+      [Resolve]
+      DNSStubListener=no
+    mode: '0644'
+  notify: restart systemd-resolved

@@ -51,6 +51,7 @@
       ipconfig0: "ip={{ vm_config.ansible_host }}/{{ vm_config.netmask_cidr }},gw={{ vm_config.network_gateway }}"
     ciuser: "{{ ansible_user }}"
     cipassword: "{{ vm_default_password }}"
+    nameservers: "{{ vm_config.dns_servers }}"
 
 # This task has to run as the root user, not an API token, in order to use an absolute path for disk import.
 # Importing qcow2 images through the API isn't supported yet. Follow this thread:
