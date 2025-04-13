@@ -46,6 +46,8 @@ spec:
                   key: password
             - name: FTLCONF_dns_upstreams
               value: "1.1.1.1;1.0.0.1"
+            - name: FTLCONF_dns_listeningMode
+              value: "all"
           volumeMounts:
             - name: pihole-data
               mountPath: /etc/pihole
