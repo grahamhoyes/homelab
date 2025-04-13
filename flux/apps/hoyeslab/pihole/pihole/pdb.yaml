@@ -2,7 +2,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: pihole-pdb
-  namespace: default
+  namespace: pihole
 spec:
   minAvailable: 1
   selector:

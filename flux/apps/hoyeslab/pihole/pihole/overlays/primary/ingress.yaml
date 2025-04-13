@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: pihole  # Will be renamed to pihole-primary by the kustomize build
-  namespace: default
+  namespace: pihole
 spec:
   ingressClassName: nginx
   rules:

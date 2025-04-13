@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: pihole  # Will be replaced in overlays
-  namespace: default
+  namespace: pihole
   labels:
     app.kubernetes.io/name: pihole
     app.kubernetes.io/instance: pihole

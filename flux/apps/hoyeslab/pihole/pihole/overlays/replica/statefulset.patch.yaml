@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: pihole
+  namespace: pihole
   labels:
     app.kubernetes.io/component: replica
 spec:
