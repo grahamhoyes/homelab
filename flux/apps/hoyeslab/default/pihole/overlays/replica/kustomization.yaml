@@ -8,4 +8,7 @@ nameSuffix: -replica
 patches:
   - path: statefulset.patch.yaml
   - path: service-headless.patch.yaml
-  - path: service-loadbalancer.patch.yaml
+  - path: service-lb.patch.yaml
+    target:
+      kind: Service
+      name: pihole-(tcp|udp)

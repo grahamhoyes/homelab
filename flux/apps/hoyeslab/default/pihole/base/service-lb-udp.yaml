@@ -1,12 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: pihole  # Will be replaced in overlays
+  name: pihole-udp  # Will be replaced in overlays
   namespace: default
   labels:
     app.kubernetes.io/name: pihole
     app.kubernetes.io/instance: pihole
     app.kubernetes.io/component: primary  # Will be replaced in overlays
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "pihole-primary"  # Will be replaced in overlays
+    metallb.universe.tf/loadBalancerIPs: "192.168.20.61"  # Will be replaced in overlays
 spec:
   type: LoadBalancer
   ports:
@@ -14,18 +17,6 @@ spec:
       targetPort: dns-udp
       protocol: UDP
       name: dns-udp
-    - port: 53
-      targetPort: dns-tcp
-      protocol: TCP
-      name: dns-tcp
-    - port: 80
-      targetPort: http
-      protocol: TCP
-      name: http
-    - port: 443
-      targetPort: https
-      protocol: TCP
-      name: https
   selector:
     app.kubernetes.io/name: pihole
     app.kubernetes.io/instance: pihole

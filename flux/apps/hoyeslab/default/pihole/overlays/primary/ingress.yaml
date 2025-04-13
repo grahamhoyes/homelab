@@ -13,7 +13,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: pihole-primary
+                name: pihole-tcp-primary
                 port:
                   name: http
   tls:

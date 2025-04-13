@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - statefulset.yaml
   - service-headless.yaml
-  - service-loadbalancer.yaml
+  - service-lb-tcp.yaml
+  - service-lb-udp.yaml
