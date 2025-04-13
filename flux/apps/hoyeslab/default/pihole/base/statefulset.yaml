@@ -37,6 +37,8 @@ spec:
               protocol: TCP
               name: https
           env:
+            - name: TZ
+              value: "America/Toronto"
             - name: FTLCONF_webserver_api_password
               valueFrom:
                 secretKeyRef:
@@ -56,15 +58,15 @@ spec:
               memory: 512Mi
           livenessProbe:
             httpGet:
-              path: /admin/index.php
+              path: /admin
               port: 80
-            initialDelaySeconds: 30
+            initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /admin/index.php
+              path: /admin
               port: 80
-            initialDelaySeconds: 30
+            initialDelaySeconds: 10
             periodSeconds: 10
 
       affinity:
@@ -75,6 +77,10 @@ spec:
                 labelSelector:
                   matchExpressions:
                     - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - pihole
+                    - key: app.kubernetes.io/instance
                       operator: In
                       values:
                         - pihole
