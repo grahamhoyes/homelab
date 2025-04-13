@@ -9,7 +9,7 @@ spec:
     - host: pihole.hoyes.dev
       http:
         paths:
-          - path: /admin
+          - path: /
             pathType: Prefix
             backend:
               service:
