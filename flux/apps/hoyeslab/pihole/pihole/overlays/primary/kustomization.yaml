@@ -9,7 +9,10 @@ nameSuffix: -primary
 patches:
   - path: statefulset.patch.yaml
   - path: service-headless.patch.yaml
+  # Adds the appropriate annotations to all services
   - path: service-lb.patch.yaml
     target:
       kind: Service
       name: pihole-(tcp|udp)
+  # Adds web UI ports only for the primary TCP service
+  - path: service-lb-tcp.patch.yaml

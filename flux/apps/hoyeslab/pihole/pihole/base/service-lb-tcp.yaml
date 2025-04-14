@@ -17,14 +17,6 @@ spec:
       targetPort: dns-tcp
       protocol: TCP
       name: dns-tcp
-    - port: 80
-      targetPort: http
-      protocol: TCP
-      name: http
-    - port: 443
-      targetPort: https
-      protocol: TCP
-      name: https
   selector:
     app.kubernetes.io/name: pihole
     app.kubernetes.io/instance: pihole
