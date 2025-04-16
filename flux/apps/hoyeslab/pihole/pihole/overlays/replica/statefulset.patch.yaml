@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pihole
+  namespace: pihole
+  labels:
+    app.kubernetes.io/component: replica
+spec:
+  replicas: 2
+  serviceName: pihole-headless-replica
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: replica
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: replica

@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pihole  # Will be renamed to pihole-primary by the kustomize build
+  namespace: pihole
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: pihole.hoyes.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pihole-tcp-primary
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - pihole.hoyes.dev
+      secretName: hoyes-dev-tls

@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pihole  # Will be replaced in overlays
+  namespace: pihole
+  labels:
+    app.kubernetes.io/name: pihole
+    app.kubernetes.io/instance: pihole
+    app.kubernetes.io/component: primary  # Will be replaced in overlays
+spec:
+  replicas: 1  # Will be replaced in overlays
+  serviceName: pihole-headless  # Will be replaced in overlays
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pihole
+      app.kubernetes.io/instance: pihole
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pihole
+        app.kubernetes.io/instance: pihole
+        app.kubernetes.io/component: primary  # Will be replaced in overlays
+    spec:
+      containers:
+        - name: pihole
+          image: ghcr.io/pi-hole/pihole:2025.04.0
+          ports:
+            - containerPort: 53
+              protocol: TCP
+              name: dns-tcp
+            - containerPort: 53
+              protocol: UDP
+              name: dns-udp
+            - containerPort: 80
+              protocol: TCP
+              name: http
+            - containerPort: 443
+              protocol: TCP
+              name: https
+          env:
+            - name: TZ
+              value: "America/Toronto"
+            - name: FTLCONF_webserver_api_password
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-admin
+                  key: password
+            - name: FTLCONF_dns_upstreams
+              value: "1.1.1.1;1.0.0.1"
+            - name: FTLCONF_dns_listeningMode
+              value: "all"
+          volumeMounts:
+            - name: pihole-data
+              mountPath: /etc/pihole
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /admin/login
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /admin/login
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - pihole
+                    - key: app.kubernetes.io/instance
+                      operator: In
+                      values:
+                        - pihole
+                topologyKey: "kubernetes.io/hostname"
+
+  volumeClaimTemplates:
+    - metadata:
+        name: pihole-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 2Gi

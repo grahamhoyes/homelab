@@ -31,14 +31,12 @@ k3s_agents:
       gpu_type: UHD_730
     k3s-worker-2:
       ansible_host: 192.168.20.22
-      netmask_cidr: 23
       proxmox_host: pve2
       vm_id: 222
       vlan_id: 20
       gpu_type: UHD_630
     k3s-worker-3:
       ansible_host: 192.168.20.23
-      netmask_cidr: 23
       proxmox_host: pve3
       vm_id: 223
       vlan_id: 20

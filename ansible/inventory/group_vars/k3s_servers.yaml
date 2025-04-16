@@ -5,3 +5,5 @@ vm_disk_gb: 50
 vlan_id: 20
 network_gateway: "192.168.20.1"
 netmask_cidr: 23
+dns_servers:
+  - 192.168.2.1
