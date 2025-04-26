@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - media/
   - default/
+  - pihole/ks.yaml
