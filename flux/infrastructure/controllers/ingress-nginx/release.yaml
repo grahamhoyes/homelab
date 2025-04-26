@@ -14,4 +14,7 @@ spec:
         kind: HelmRepository
         name: ingress-nginx
         namespace: flux-system
-  values: {}
+  values:
+    controller:
+      service:
+        externalTrafficPolicy: Local
