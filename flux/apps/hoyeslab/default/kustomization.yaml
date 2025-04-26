@@ -4,4 +4,3 @@ resources:
 - certificate.yaml
 - external-services/
 - wallos/
-- pihole/
