@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: wallos
-          image: ghcr.io/ellite/wallos:2.48.1
+          image: ghcr.io/ellite/wallos:2.52.2
           ports:
             - name: http
               containerPort: 80
