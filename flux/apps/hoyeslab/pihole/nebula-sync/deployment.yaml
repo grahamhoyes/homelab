@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: nebula-sync
-          image: ghcr.io/lovelaze/nebula-sync:v0.9.0
+          image: ghcr.io/lovelaze/nebula-sync:v0.11.0
           env:
             - name: TZ
               value: "America/Toronto"
