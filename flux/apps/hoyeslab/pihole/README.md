@@ -195,3 +195,4 @@ If you use BGP for MetalLB instead (Layer 3 mode), `externalTrafficPolicy: Local
     - Some alternatives to this:
         - Deploy Pi-hole on a separate Raspberry Pi, and switch to using network-level DNS configuration in Unifi Network rather than WAN-level, which would allow specifying a third DNS server.
         - Deploy a Raspberry Pi somewhere else in my network, but make it a k3s node so we can keep using metallb. Figure out how to make sure one Pi-hole replica stays on that node.
+- Instead of setting the primary / replicas URL + password configuration string for nebula-sync in 1password as its own field, switch to External Secrets Operator and use templating to build that variable with just the password stored in 1password.
