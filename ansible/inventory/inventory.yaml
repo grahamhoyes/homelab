@@ -6,6 +6,8 @@ proxmox:
       ansible_host: 192.168.2.31
     pve3:
       ansible_host: 192.168.2.32
+    pve4:
+      ansible_host: 192.168.2.33
 
 k3s_servers:
   hosts:
@@ -44,6 +46,15 @@ k3s_agents:
       # pve3 is slightly more powerful, so take some extra resources
       vm_cpu_cores: 10
       vm_memory_mb: 16384
+    k3s-worker-4:
+      ansible_host: 192.168.20.24
+      proxmox_host: pve4
+      vm_id: 224
+      vlan_id: 20
+      gpu_type: UHD_770
+      # pve4 is significantly more powerful
+      vm_cpu_cores: 20
+      vm_memory_mb: 32768
 
 k3s_cluster:
   children:
