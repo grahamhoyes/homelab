@@ -80,8 +80,38 @@ spec:
         - name: jellyfin-transcode
           emptyDir: {}
 
-      nodeSelector:
-        gpu.hoyes.dev/type: "UHD_730"
-        # Technically redundant with the above, but makes sure that the deployment fails
-        # if something is wrong with the intel device plugins
-        intel.feature.node.kubernetes.io/gpu: "true"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: gpu.hoyes.dev/type
+                operator: In
+                values:
+                  - UHD_730
+                  - UHD_770
+              # Technically redundant with the above, but makes sure that the deployment fails
+              # if something is wrong with the intel device plugins
+              - key: intel.feature.node.kubernetes.io/gpu
+                operator: In
+                values:
+                  - "true"
+
+          # Prefer nodes with UHD 770 GPUs (can handle more concurrent streams),
+          # but allow UHD 730 nodes as well. Note that without a descheduler, the scheduler
+          # will not move pods around if a more-preferred node becomes available.
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                - key: gpu.hoyes.dev/type
+                  operator: In
+                  values:
+                  - UHD_770
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: gpu.hoyes.dev/type
+                    operator: In
+                    values:
+                      - UHD_730
