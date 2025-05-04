@@ -12,14 +12,3 @@ proxmox_gpu_mapped_device: intel_igpu
 proxmox_api_user: "root@pam"
 proxmox_api_token_id: "ansible-automation"
 proxmox_api_token_secret: "{{ vault_proxmox_api_token_secret }}"
-
-# Cloud image to create VMs from. Only Ubuntu images are supported.
-cloud_image_name: noble-server-cloudimg-amd64.img
-cloud_image_url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
-
-# Network bridge device
-network_bridge: vmbr0
-
-# Password on the created VMs. Normally this isn't needed since SSH keys
-# are uploaded as part of the cloud init setup.
-vm_default_password: "{{ vault_vm_default_password }}"

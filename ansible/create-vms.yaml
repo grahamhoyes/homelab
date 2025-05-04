@@ -1,0 +1,39 @@
+- name: Download cloud image
+  hosts: proxmox[0]
+  gather_facts: true
+  tasks:
+    # This assumes that `proxmox_image_storage` is a shared drive (NFS, CephFS, etc) that all
+    # nodes can access. If using a local drive, move these tasks down to the next section
+    # that runs on all nodes.
+    - name: Create images directory
+      file:
+        path: /mnt/pve/{{ proxmox_image_storage }}/template/iso/
+        state: directory
+        mode: '0755'
+
+    - name: Download Ubuntu cloud image
+      get_url:
+        url: "{{ cloud_image_url }}"
+        dest: /mnt/pve/{{ proxmox_image_storage }}/template/iso/{{ cloud_image_name }}
+        force: no  # Don't redownload if exists
+
+- name: Create VMs from cloud image
+  hosts: proxmox
+  gather_facts: true
+  tasks:
+    - name: Set fact for VMs on this host
+      set_fact:
+        vms_to_create: >
+          {{
+            groups['k3s_cluster']
+            | map('extract', hostvars)
+            | selectattr('proxmox_host', 'eq', inventory_hostname)
+            | list
+          }}
+
+    - name: Create VM
+      loop: "{{ vms_to_create }}"
+      loop_control:
+        loop_var: vm_config
+        label: "Creating {{ vm_config.inventory_hostname }}"
+      include_tasks: tasks/create-vm.yaml

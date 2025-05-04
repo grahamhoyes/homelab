@@ -46,7 +46,7 @@ The main inventory is in [inventory/inventory.yaml](inventory/inventory.yaml). T
 
 Various settings and defaults are in [inventory/group_vars](inventory/group_vars/), separated by resource type.
 
-Settings for k3s itself are in [vars/k3s.yaml](vars/k3s.yaml), as these can't be loaded until the VMs are created part way through the playbook.
+Settings for k3s itself are in [vars/k3s.yaml](vars/k3s.yaml), as these can't be loaded until the VMs are created.
 
 ### Secrets
 
@@ -97,20 +97,33 @@ This playbook will:
 >
 > You won't be able to use monitors connected to the onboard GPU after Proxmox boots.
 
-
-### Provision VMs and Install k3s
+### Provision VMs
 
 ```bash
-ansible-playbook site.yaml
+ansible-playbook create-vms.yaml
 ```
 
 This playbook will:
 - Download an Ubuntu cloud image
 - Create Proxmox VMs for k3s control plane and worker nodes
-- Install k3s
+
+The cloud image used is defined in [inventory/group_vars/all/vars.yaml](inventory/group_vars/all/vars.yaml). Only Ubuntu is supported. The corresponding kernel package must be defined in the `kernel_package` variable.
+
+### Install k3s
+
+```bash
+ansible-playbook k3s.yaml
+```
+
+This playbook will:
+- Configure the VMs (created using the `create-vms.yaml` playbook) with necessary system dependencies
+- Install k3s with cilium, kube-vip, and MetalLB
 
 This playbook uses [Techno Tim's k3s-ansible playbook](https://github.com/techno-tim/k3s-ansible) internally to configure HA k3s with kube-vip and MetalLB.
 
+This playbook can be run again to upgrade the cluster as needed. The versions for k3s, cilium, kube-vip, and MetalLB are set in [vars/k3s.yaml](vars/k3s.yaml). Using this playbook to do a major Ubuntu upgrade isn't recommended, to do that delete the VMs one at a time and recreate them using the above playbook.
+
+Note: With the way Techno Tim's k3s-ansible playbook is written, the entire cluster goes briefly offline when running this.
 
 ### Reset VMs
 

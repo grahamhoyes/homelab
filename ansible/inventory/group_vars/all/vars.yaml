@@ -6,3 +6,15 @@ cluster_name: "HoyesLab"
 
 # Timezone
 system_timezone: "America/Toronto"
+
+# Cloud image to create VMs from. Only Ubuntu images are supported.
+cloud_image_name: noble-server-cloudimg-amd64.img
+cloud_image_url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+kernel_package: linux-generic-hwe-24.04
+
+# Network bridge device
+network_bridge: vmbr0
+
+# Password on the created VMs. Normally this isn't needed since SSH keys
+# are uploaded as part of the cloud init setup.
+vm_default_password: "{{ vault_vm_default_password }}"
