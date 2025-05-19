@@ -1,0 +1,32 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: external-dns
+spec:
+  releaseName: external-dns
+  interval: 10m
+  chart:
+    spec:
+      chart: external-dns
+      version: 8.8.2
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+        namespace: flux-system
+  values:
+    policy: sync
+    sources:
+      - ingress
+    provider: cloudflare
+    txtOwnerId: ${CLUSTER_NAME}
+    # The default `nginx` ingress class is excluded, since that is used with
+    # a wildcard DNS record for internal services.
+    ingressClassFilters: []
+    cloudflare:
+      # Note: Secret must have a field named `cloudflare_api_token`
+      secretName: cloudflare-api-token
+      dnsRecordsPerPage: 1000
+      # Non-proxied internal records are captured by a wildcard DNS entry
+      proxied: true
