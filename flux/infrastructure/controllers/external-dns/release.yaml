@@ -23,7 +23,8 @@ spec:
     txtOwnerId: ${CLUSTER_NAME}
     # The default `nginx` ingress class is excluded, since that is used with
     # a wildcard DNS record for internal services.
-    ingressClassFilters: []
+    ingressClassFilters:
+      - nginx-cloudflare
     cloudflare:
       # Note: Secret must have a field named `cloudflare_api_token`
       secretName: cloudflare-api-token
