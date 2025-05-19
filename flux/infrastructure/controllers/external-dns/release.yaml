@@ -21,10 +21,7 @@ spec:
       - ingress
     provider: cloudflare
     txtOwnerId: ${CLUSTER_NAME}
-    # The default `nginx` ingress class is excluded, since that is used with
-    # a wildcard DNS record for internal services.
-    ingressClassFilters:
-      - nginx-cloudflare
+    annotationFilter: "infra.hoyes.dev/external-dns=true"
     cloudflare:
       # Note: Secret must have a field named `cloudflare_api_token`
       secretName: cloudflare-api-token
