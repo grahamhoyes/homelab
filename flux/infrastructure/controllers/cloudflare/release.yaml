@@ -1,0 +1,36 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cloudflare-tunnel
+  namespace: cloudflare
+spec:
+  releaseName: cloudflare-tunnel
+  interval: 10m
+  chart:
+    spec:
+      chart: cloudflare-tunnel
+      version: 0.3.2
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: cloudflare
+        namespace: flux-system
+  values:
+    cloudflare:
+      tunnelName: ${CLUSTER_NAME}
+      secretName: cloudflare-tunnel-credentials
+
+      ingress:
+        # The *.hoyes.dev CNAME wildcard points to the regular ingress-nginx controller.
+        # To use the tunnel, external-dns annotations must be added to the ingress resources.
+        - hostname: "*.hoyes.dev"
+          service: "https://ingress-nginx-cloudflare-controller.ingress-nginx.svc.cluster.local:443"
+          originRequest:
+            # The ingress-nginx controller uses a self-signed certificate
+            noTLSVerify: true
+
+    image:
+      repository: cloudflare/cloudflared
+      tag: 2025.5.0
+
+    replicaCount: 2

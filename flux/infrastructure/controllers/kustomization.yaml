@@ -9,3 +9,4 @@ resources:
   - intel-device-plugins/
   - tailscale/
   - external-dns/
+  - cloudflare/
