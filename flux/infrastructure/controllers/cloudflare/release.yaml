@@ -24,7 +24,7 @@ spec:
         # The *.hoyes.dev CNAME wildcard points to the ingress-nginx controller directly.
         # To use the tunnel, external-dns annotations must be added to the ingress resources.
         - hostname: "*.hoyes.dev"
-          service: "https://ingress-nginx-controller.ingress-nginx.svc.cluster.local:443"
+          service: "https://ingress-nginx-controller-internal.ingress-nginx.svc.cluster.local:443"
           originRequest:
             # The ingress-nginx controller uses a self-signed certificate
             noTLSVerify: true

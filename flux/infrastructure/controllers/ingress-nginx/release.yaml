@@ -28,7 +28,6 @@ spec:
         internal:
           enabled: true
           type: ClusterIP
-          externalTrafficPolicy: Local
           annotations:
             # The chart requires annotations in order to create an internal service.
             dummy: "true"
