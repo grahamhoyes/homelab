@@ -1,7 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- certificate.yaml
-- external-services/
-- wallos/
-- httpbin/ks.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml

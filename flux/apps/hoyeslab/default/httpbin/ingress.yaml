@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: httpbin
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: httpbin.hoyes.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: httpbin
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - httpbin.hoyes.dev
+      secretName: hoyes-dev-tls

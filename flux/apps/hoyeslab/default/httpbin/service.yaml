@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  namespace: default
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app.kubernetes.io/name: httpbin
+    app.kubernetes.io/instance: httpbin
+  ports:
+    - targetPort: http
+      name: http
+      port: 80
