@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: actual-budget
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: actual-budget
+    app.kubernetes.io/instance: actual-budget
+  ports:
+    - targetPort: http
+      name: http
+      port: 80

@@ -4,4 +4,5 @@ resources:
 - certificate.yaml
 - external-services/
 - wallos/
+- actual-budget/
 - httpbin/ks.yaml
