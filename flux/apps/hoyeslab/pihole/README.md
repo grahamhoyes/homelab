@@ -180,7 +180,7 @@ I run MetalLB in Layer 2 mode, which means at any given time only a single node 
     - Advantage: Source IP address is preserved.
     - Disadvantage: There is no active load balancing of traffic. Replicas are only used for failover (at which case a different node will start advertising the service IP).
 
-See MetalLB's [docs on traffic policies](https://metallb.universe.tf/usage/#traffic-policies) for more details.
+See MetalLB's [docs on traffic policies](https://metallb.io/usage/index.html) for more details.
 
 Given that this entire set up is about high availability for failover, not load balancing traffic (DNS load is trivial), I use `externalTrafficPolicy: Local` to preserve source IPs. This only impacts the replica statefulset anyway, since the primary statefulset only has a single instance.
 

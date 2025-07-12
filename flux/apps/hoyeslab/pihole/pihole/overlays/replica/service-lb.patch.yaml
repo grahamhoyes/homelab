@@ -6,8 +6,8 @@ metadata:
   labels:
     app.kubernetes.io/component: replica
   annotations:
-    metallb.universe.tf/allow-shared-ip: "pihole-replica"
-    metallb.universe.tf/loadBalancerIPs: "192.168.20.62"
+    metallb.io/allow-shared-ip: "pihole-replica"
+    metallb.io/loadBalancerIPs: "192.168.20.62"
 spec:
   selector:
     app.kubernetes.io/component: replica

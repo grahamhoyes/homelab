@@ -6,8 +6,8 @@ metadata:
   labels:
     app.kubernetes.io/component: primary
   annotations:
-    metallb.universe.tf/allow-shared-ip: "pihole-primary"
-    metallb.universe.tf/loadBalancerIPs: "192.168.20.61"
+    metallb.io/allow-shared-ip: "pihole-primary"
+    metallb.io/loadBalancerIPs: "192.168.20.61"
 spec:
   selector:
     app.kubernetes.io/component: primary
