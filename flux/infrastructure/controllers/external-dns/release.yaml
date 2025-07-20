@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: external-dns
-      version: 8.9.2
+      version: 1.18.0
       reconcileStrategy: ChartVersion
       sourceRef:
         kind: HelmRepository
@@ -19,15 +19,22 @@ spec:
     policy: sync
     sources:
       - ingress
-    provider: cloudflare
     txtOwnerId: ${CLUSTER_NAME}
-    # The default `nginx` ingress class is excluded, since that is used with
-    # a wildcard DNS record for internal services.
-    ingressClassFilters:
-      - nginx-cloudflare
-    cloudflare:
-      # Note: Secret must have a field named `cloudflare_api_token`
-      secretName: cloudflare-api-token
-      dnsRecordsPerPage: 1000
-      # Non-proxied internal records are captured by a wildcard DNS entry
-      proxied: true
+
+    provider:
+      name: cloudflare
+
+    extraArgs:
+      # Non-proxied internal records are captured by a wildcard DNS entry pointing
+      # to the `nginx` ingress controller
+      - --cloudflare-proxied
+      - --cloudflare-dns-records-per-page=1000
+      # Can specify this argument multiple times to monitor multiple ingress classes
+      - --ingress-class=nginx-cloudflare
+
+    env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token
+            key: cloudflare_api_token

@@ -4,5 +4,4 @@ metadata:
   name: external-dns
   namespace: flux-system
 spec:
-  type: oci
-  url: oci://registry-1.docker.io/bitnamicharts
+  url: https://kubernetes-sigs.github.io/external-dns/
