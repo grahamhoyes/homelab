@@ -7,6 +7,14 @@
   ansible.builtin.apt:
     name: "{{ kernel_package }}"
 
+- name: Upgrade OS
+  ansible.builtin.apt:
+    upgrade: dist
+
+- name: Upgrade packages
+  ansible.builtin.apt:
+    upgrade: yes
+
 - name: Check if reboot is required
   ansible.builtin.stat:
     path: /var/run/reboot-required

@@ -24,18 +24,27 @@
   tasks:
     - include_vars: vars/k3s.yaml
 
+- name: Install system requirements
+  hosts: k3s_cluster
+  gather_facts: true
+  serial: 1
+  roles:
+    - role: system_requirements
+      become: true
+
 - name: Prepare k3s nodes
   hosts: k3s_cluster
   gather_facts: true
   roles:
-    - role: system_requirements
-      become: true
     - role: techno_tim.k3s_ansible.prereq
       become: true
     # Download k3s binary
     - role: techno_tim.k3s_ansible.download
       become: true
 
+# This can't be serial on initial setup since it verifies that all nodes join:
+# https://github.com/techno-tim/k3s-ansible/blob/422621c69cdc7f57381dadaf6c26c8b3f4ff447a/roles/k3s_server/tasks/main.yml#L44
+# However, it can be serial on subsequent runs to avoid control plane downtime
 - name: Setup k3s servers
   hosts: k3s_servers
   roles:
@@ -44,24 +53,17 @@
 
 - name: Setup k3s agents
   hosts: k3s_agents
+  serial: 1
   roles:
     - role: techno_tim.k3s_ansible.k3s_agent
       become: true
 
 - name: Configure k3s cluster
   hosts: k3s_servers
+  serial: 1
   roles:
     - role: techno_tim.k3s_ansible.k3s_server_post
       become: true
-
-- name: Reboot k3s cluster nodes
-  hosts: k3s_cluster
-  gather_facts: false
-  tasks:
-    - name: Rebooting {{ inventory_hostname }}
-      ansible.builtin.reboot:
-        reboot_timeout: 600
-        msg: "Reboot initiated by Ansible for k3s cluster"
 
 - name: Storing kubeconfig in the playbook directory
   hosts: k3s_servers[0]
