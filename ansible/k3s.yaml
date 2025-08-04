@@ -1,3 +1,11 @@
+# Variables must be loaded now rather than as part of group_vars since they depend
+# on the results of the previous tasks (VM creation in particular)
+- name: Include k3s variables
+  hosts: k3s_cluster
+  gather_facts: true
+  tasks:
+    - include_vars: vars/k3s.yaml
+
 - name: Configure storage disks
   hosts: k3s_agents
   gather_facts: true
@@ -15,23 +23,6 @@
         opts: defaults
         state: mounted
 
-
-# Variables must be loaded now rather than as part of group_vars since they depend
-# on the results of the previous tasks (VM creation in particular)
-- name: Include k3s variables
-  hosts: k3s_cluster
-  gather_facts: true
-  tasks:
-    - include_vars: vars/k3s.yaml
-
-- name: Install system requirements
-  hosts: k3s_cluster
-  gather_facts: true
-  serial: 1
-  roles:
-    - role: system_requirements
-      become: true
-
 - name: Prepare k3s nodes
   hosts: k3s_cluster
   gather_facts: true
@@ -42,11 +33,50 @@
     - role: techno_tim.k3s_ansible.download
       become: true
 
+- name: Install system requirements
+  hosts: k3s_cluster
+  gather_facts: true
+  serial: 1
+  roles:
+    - role: system_requirements
+      become: true
+
+# Detect cluster state to determine if we can run serial (for zero-downtime upgrades)
+- name: Detect cluster state
+  hosts: k3s_servers[0]
+  gather_facts: false
+  tasks:
+    - name: Check if cluster is accessible and count existing server nodes
+      ansible.builtin.command:
+        cmd: "k3s kubectl get nodes -l 'node-role.kubernetes.io/master=true' -o name"
+      register: existing_servers
+      failed_when: false
+      changed_when: false
+
+    - name: Set cluster state facts
+      ansible.builtin.set_fact:
+        cluster_exists: "{{ existing_servers.rc == 0 }}"
+        existing_server_count: "{{ existing_servers.stdout_lines | length if existing_servers.rc == 0 else 0 }}"
+        inventory_master_count: "{{ groups['k3s_servers'] | length }}"
+        # Can run serial if all existing servers are in the inventory and no new servers are being added
+        # This is required for compatibility with techno-tim/k3s-ansible
+        can_run_serial: "{{ existing_servers.rc == 0 and (existing_servers.stdout_lines | length) == (groups['k3s_servers'] | length) }}"
+
+    - name: Debug cluster state detection
+      ansible.builtin.debug:
+        msg:
+          - "Cluster exists: {{ cluster_exists }}"
+          - "Existing masters: {{ existing_server_count }}"
+          - "Inventory masters: {{ inventory_master_count }}"
+          - "Can run serial: {{ can_run_serial }}"
+
+
 # This can't be serial on initial setup since it verifies that all nodes join:
 # https://github.com/techno-tim/k3s-ansible/blob/422621c69cdc7f57381dadaf6c26c8b3f4ff447a/roles/k3s_server/tasks/main.yml#L44
 # However, it can be serial on subsequent runs to avoid control plane downtime
 - name: Setup k3s servers
   hosts: k3s_servers
+  serial: "{{ hostvars[groups['k3s_servers'][0]]['can_run_serial'] | default(false) | ternary(1, '100%') }}"
   roles:
     - role: techno_tim.k3s_ansible.k3s_server
       become: true
