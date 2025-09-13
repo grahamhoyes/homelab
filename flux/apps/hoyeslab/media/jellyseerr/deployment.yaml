@@ -7,6 +7,9 @@ metadata:
     app.kubernetes.io/name: jellyseerr
     app.kubernetes.io/instance: jellyseerr
 spec:
+  strategy:
+    # Recreate strategy required due to the ReadWriteOnce PVC
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:

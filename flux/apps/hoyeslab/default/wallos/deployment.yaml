@@ -7,6 +7,9 @@ metadata:
     app.kubernetes.io/name: wallos
     app.kubernetes.io/instance: wallos
 spec:
+  strategy:
+    # Recreate strategy required due to the ReadWriteOnce PVCs
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:

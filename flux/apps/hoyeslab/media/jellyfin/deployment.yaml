@@ -9,6 +9,7 @@ metadata:
 spec:
   strategy:
     # Recreate strategy required due to limited resources
+    # and because of the ReadWriteOnce PVC
     type: Recreate
   replicas: 1
   selector:

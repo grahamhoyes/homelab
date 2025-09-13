@@ -7,6 +7,9 @@ metadata:
     app.kubernetes.io/name: actual-budget
     app.kubernetes.io/instance: actual-budget
 spec:
+  strategy:
+    # Recreate strategy required due to the ReadWriteOnce PVC
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
