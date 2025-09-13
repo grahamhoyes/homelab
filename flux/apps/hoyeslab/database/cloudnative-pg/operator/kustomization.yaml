@@ -1,7 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - media/
-  - default/
-  - database/
-  - pihole/ks.yaml
+  - repository.yaml
+  - release.yaml
+  - secret.yaml
