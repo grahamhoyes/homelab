@@ -63,3 +63,22 @@ docker compose exec versitygw /app/versitygw admin change-bucket-owner --bucket 
 As demonstrated in the examples above, Versity Gateway can be deployed behind a reverse proxy for both admin and S3 operations. I used Synology's built-in reverse proxy (Control Panel > Login Portal > Advanced > Reverse Proxy) to proxy `https://versitygw.hoyes.dev` (which resolves to a local IP address) to `http://localhost:7070`.
 
 Use discretion if exposing to the public internet.
+
+## Creating Buckets
+
+The `versitygw` CLI cannot create or delete buckets and objects. For that, we need the `aws` CLI.
+
+To create a bucket, either the root user or a user with the `userplus` role is required. If using a regular `user` role, create the bucket using the root user then reassign the bucket owner using the command above.
+
+```shell
+ export AWS_ACCESS_KEY_ID=versitygw  # Root user or user with `userplus` role
+ export AWS_SECRET_ACCESS_KEY=<secret_key>
+
+aws --endpoint-url https://versitygw.hoyes.dev s3 mb s3://my_bucket
+```
+
+To delete a bucket, again using either the root user or a `userplus` role:
+
+```shell
+aws --endpoint-url https://versitygw.hoyes.dev s3 rb s3://my_bucket --force
+```
