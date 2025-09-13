@@ -1,0 +1,16 @@
+services:
+  versitygw:
+    image: ghcr.io/versity/versitygw:v1.0.17
+    restart: always
+    command: >-
+      --iam-dir /config
+      posix
+      /data/buckets
+      --versioning-dir /data/versions
+      --bucketlinks
+    ports:
+      - "7070:7070"
+    volumes:
+      - /volume1/object_storage/versitygw:/data
+      - ./config:/config
+    env_file: .env

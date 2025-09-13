@@ -12,5 +12,10 @@
   },
   "kubernetes": {
     "fileMatch": ["(^|/)flux/.+\\.ya?ml$"]
-  }
+  },
+  "packageRules": [
+    {
+      "minimumReleaseAge": "3 days"
+    }
+  ]
 }
