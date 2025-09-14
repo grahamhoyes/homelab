@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-ngx
+  namespace: paperless
+  labels:
+    app.kubernetes.io/name: paperless-ngx
+    app.kubernetes.io/instance: paperless-ngx
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: paperless-ngx
+      app.kubernetes.io/instance: paperless-ngx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: paperless-ngx
+        app.kubernetes.io/instance: paperless-ngx
+    spec:
+      containers:
+        - name: paperless-ngx
+          image: ghcr.io/paperless-ngx/paperless-ngx:2.18.4
+          env:
+            # Database settings
+            - name: PAPERLESS_DBHOST
+              value: paperless-pg17-rw
+            - name: PAPERLESS_DBENGINE
+              value: postgresql
+            - name: PAPERLESS_DBUSER
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-pg17-app
+                  key: username
+            - name: PAPERLESS_DBPASS
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-pg17-app
+                  key: password
+            - name: PAPERLESS_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-pg17-app
+                  key: dbname
+            # Redis
+            - name: PAPERLESS_REDIS
+              value: redis://paperless-dragonfly:6379/0
+
+            # Host settings
+            - name: PAPERLESS_URL
+              value: https://paperless.hoyes.dev
+            - name: PAPERLESS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-ngx
+                  key: secret_key
+            - name: PAPERLESS_TIME_ZONE
+              value: America/Toronto
+
+            # File configuration
+            - name: PAPERLESS_FILENAME_FORMAT
+              value: "{{ created_year }}/{{ document_type }}/{{ created_year }}-{{ created_month }}-{{ created_day }}_{{ title }}"
+            - name: PAPERLESS_FILENAME_FORMAT_REMOVE_NONE
+              value: "true"
+
+            # UID and GID are of the service-access NFS user
+            - name: USERMAP_UID
+              value: ${quote}${NFS_UID}${quote}
+            - name: USERMAP_GID
+              value: ${quote}${NFS_GID}${quote}
+
+            # Poll for new documents every 10 seconds, since NFS doesn't support inotify
+            - name: PAPERLESS_CONSUMER_POLLING
+              value: "10"
+            - name: PAPERLESS_CONSUMER_RECURSIVE
+              value: "true"
+            - name: PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS
+              value: "true"
+
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            httpGet:
+              path: /
+              port: http
+
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 3Gi
+
+          volumeMounts:
+            - mountPath: /usr/src/paperless/media
+              name: paperless-media
+            - mountPath: /usr/src/paperless/consume
+              name: paperless-consume
+            - mountPath: /usr/src/paperless/export
+              name: paperless-export
+            - mountPath: /usr/src/paperless/data
+              name: paperless-data
+
+      volumes:
+        # Media volume where processed files are stored
+        - name: paperless-media
+          nfs:
+            server: ds920.hoyes.dev
+            path: /volume1/data/paperless/data
+        # Consume volume where new files are placed for processing
+        - name: paperless-consume
+          nfs:
+            server: ds920.hoyes.dev
+            path: /volume1/data/paperless/consume
+        # Export volume for backups
+        - name: paperless-export
+          nfs:
+            server: ds920.hoyes.dev
+            path: /volume1/backups/apps/paperless-ngx
+        # Data volume for auxiliary data
+        - name: paperless-data
+          persistentVolumeClaim:
+            claimName: paperless-data

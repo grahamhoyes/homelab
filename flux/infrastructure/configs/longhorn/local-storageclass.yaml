@@ -1,0 +1,10 @@
+# Strictly local storage class for Longhorn volumes
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: longhorn-local
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+parameters:
+  numberOfReplicas: "1"
+  dataLocality: "strict-local"

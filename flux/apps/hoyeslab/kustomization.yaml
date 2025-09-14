@@ -5,3 +5,4 @@ resources:
   - default/
   - database/
   - pihole/ks.yaml
+  - paperless/ks.yaml
