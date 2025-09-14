@@ -1,0 +1,22 @@
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: versitygw
+  namespace: paperless
+spec:
+  retentionPolicy: 7d
+  configuration:
+    data:
+      compression: gzip
+    wal:
+      compression: gzip
+      maxParallel: 8
+    destinationPath: s3://cloudnative-pg/paperless/
+    endpointURL: https://versitygw.hoyes.dev
+    s3Credentials:
+      accessKeyId:
+        name: cloudnative-pg-s3
+        key: access_key
+      secretAccessKey:
+        name: cloudnative-pg-s3
+        key: secret_key

@@ -8,35 +8,22 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:17.6-standard-trixie
 
   enableSuperuserAccess: true
-  superuserSecret:
-    name: cloudnative-pg-superuser
 
   storage:
     storageClass: longhorn-local
     size: 5Gi
 
-  backup:
-    retentionPolicy: 7d
-    barmanObjectStore: &barmanObjectStore
-      data:
-        compression: bzip2
-      wal:
-        compression: bzip2
-        maxParallel: 8
-      destinationPath: s3://cloudnative-pg/paperless
-      endpointURL: https://versitygw.hoyes.dev
-      serverName: paperless-pg17-001
-      s3Credentials:
-        accessKeyId:
-          name: cloudnative-pg-s3
-          key: access_key
-        secretAccessKey:
-          name: cloudnative-pg-s3
-          key: secret_key
-
   bootstrap:
     initdb:
       database: paperless
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: versitygw
+        serverName: paperless-pg17-001
+
 
   # Example configuration to restore a backup onto a new cluster, instead of using initdb
   # See: https://cloudnative-pg.io/documentation/current/recovery/
@@ -47,6 +34,8 @@ spec:
 
   # externalClusters:
   #   - name: *previousCluster
-  #     barmanObjectStore:
-  #       <<: *barmanObjectStore
-  #       serverName: *previousCluster
+  #     plugin:
+  #       name: barman-cloud.cloudnative-pg.io
+  #       parameters:
+  #         barmanObjectName: versitygw
+  #         serverName: *previousCluster
