@@ -1,4 +1,4 @@
-# homelab-private repo that is structured very similarily to this one
+# homelab-private repo that is structured very similarly to this one
 ---
 apiVersion: onepassword.com/v1
 kind: OnePasswordItem
@@ -6,7 +6,7 @@ metadata:
   name: homelab-private-key
   namespace: flux-system
 spec:
-  itemPath: "vaults/infrastructure/items/homelab-private SSH Key"
+  itemPath: "vaults/Infrastructure/items/homelab-private SSH Key"
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository

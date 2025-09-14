@@ -1,6 +1,6 @@
 # 1Password Operator
 
-This set of manifests deployes the [1Password Connect Server and Kubernetes Operator](https://github.com/1Password/connect-helm-charts/tree/main/charts/connect) (and associated CRDs). These are then used for secret management by the rest of the cluster.
+This set of manifests deploys the [1Password Connect Server and Kubernetes Operator](https://github.com/1Password/connect-helm-charts/tree/main/charts/connect) (and associated CRDs). These are then used for secret management by the rest of the cluster.
 
 The Connect server and operator require a credentials file and token respectively. Since I haven't set up SOPS or similar at the time of writing, these are created manually:
 
