@@ -67,9 +67,9 @@ spec:
 
             # UID and GID are of the service-access NFS user
             - name: USERMAP_UID
-              value: ${quote}${NFS_UID}${quote}
+              value: "1029"
             - name: USERMAP_GID
-              value: ${quote}${NFS_GID}${quote}
+              value: "100"
 
             # Poll for new documents every 10 seconds, since NFS doesn't support inotify
             - name: PAPERLESS_CONSUMER_POLLING
