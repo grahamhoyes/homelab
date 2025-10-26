@@ -34,7 +34,6 @@ spec:
       annotations:
         external-dns.alpha.kubernetes.io/hostname: longhorn.hoyes.dev
         external-dns.alpha.kubernetes.io/target: ingress-nginx-tailscale.hoyes.dev
-      host: longhorn.hoyes.dev
-      annotations:
         cert-manager.io/cluster-issuer: letsencrypt
+      host: longhorn.hoyes.dev
       tlsSecret: longhorn-tls
