@@ -10,6 +10,12 @@ This set of playbooks configures Proxmox, creates a set of VMs, and installs a h
     pip install ansible netaddr
     ```
 
+2. Install ansible collections:
+
+    ```bash
+    ansible-galaxy collection install -r ./collections/requirements.yaml
+    ```
+
 2. [Install the 1password CLI](https://developer.1password.com/docs/cli/get-started/). This is optional, but I use it in [vault-pass.sh](./vault-pass.sh) to fetch the password for ansible-vault.
     - If not using 1password, update `vault-pass.sh` to fetch your password from your secret manager of source and print it to stdout.
     - If you want to use a static password instead, store it in a new file **that you add to .gitignore** and update the `vault_password_section` in [ansible.cfg](ansible.cfg).
@@ -119,7 +125,7 @@ This playbook will:
 - Configure the VMs (created using the `create-vms.yaml` playbook) with necessary system dependencies
 - Install k3s with cilium, kube-vip, and MetalLB
 
-This playbook uses [Techno Tim's k3s-ansible playbook](https://github.com/techno-tim/k3s-ansible) internally to configure HA k3s with kube-vip and MetalLB.
+This playbook uses [Techno Tim's k3s-ansible playbook](https://github.com/timothystewart6/k3s-ansible) internally to configure HA k3s with kube-vip and MetalLB.
 
 This playbook can be run again to upgrade the cluster as needed. The versions for k3s, cilium, kube-vip, and MetalLB are set in [vars/k3s.yaml](vars/k3s.yaml). Using this playbook to do a major Ubuntu upgrade isn't recommended, to do that delete the VMs one at a time and recreate them using the above playbook.
 

@@ -1,4 +1,4 @@
-k3s_version: v1.32.3+k3s1
+k3s_version: v1.34.1+k3s1
 
 # apiserver_endpoint is virtual ip address which will be configured on each master
 apiserver_endpoint: 192.168.20.2
@@ -19,8 +19,15 @@ calico_tag: v3.28.0 # calico version tag
 # ensure v4.19.57, v5.1.16, v5.2.0 or more recent kernel
 cilium_iface: "eth0"
 cilium_mode: native # native when nodes on same subnet or using bgp, else set routed
-cilium_tag: v1.17.0 # cilium version tag
+cilium_tag: v1.18.3 # cilium version tag
 cilium_hubble: true # enable hubble observability relay and ui
+# kube proxy replacement disabled since it causes issues with the Tailscale operator.
+# Alternatively, fork the k3s_server_post role and set socketLB.enabled=true, socketLB.hostNamespaceOnly=true. See:
+# https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#socket-loadbalancer-bypass-in-pod-namespace
+kube_proxy_replacement: false # Replace the native kube-proxy with Cilium
+# IP Masquerading must be disabled when kube_proxy_replacement is false
+# https://docs.cilium.io/en/stable/network/concepts/masquerading/
+enable_bpf_masquerade: false
 
 # if using calico or cilium, you may specify the cluster pod cidr pool
 cluster_cidr: 10.52.0.0/16
