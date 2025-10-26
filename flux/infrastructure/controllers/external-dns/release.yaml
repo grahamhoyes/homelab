@@ -18,23 +18,22 @@ spec:
   values:
     policy: sync
     sources:
-      - ingress
+    - ingress
+    - service
     txtOwnerId: ${CLUSTER_NAME}
 
     provider:
       name: cloudflare
 
     extraArgs:
-      # Non-proxied internal records are captured by a wildcard DNS entry pointing
-      # to the `nginx` ingress controller
-      - --cloudflare-proxied
-      - --cloudflare-dns-records-per-page=1000
-      # Can specify this argument multiple times to monitor multiple ingress classes
-      - --ingress-class=nginx-cloudflare
+    - --cloudflare-dns-records-per-page=1000
+    # The regular nginx class uses a wildcard DNS record, so isn't managed by external-dns
+    - --ingress-class=nginx-cloudflare
+    - --ingress-class=nginx-tailscale
 
     env:
-      - name: CF_API_TOKEN
-        valueFrom:
-          secretKeyRef:
-            name: cloudflare-api-token
-            key: cloudflare_api_token
+    - name: CF_API_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-api-token
+          key: cloudflare_api_token

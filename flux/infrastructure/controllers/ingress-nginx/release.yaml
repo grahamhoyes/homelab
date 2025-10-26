@@ -22,7 +22,6 @@ spec:
       ingressClassResource:
         name: nginx
         default: true
-
 ---
 
 # ingress-nginx deployment that's meant to be paired with a Cloudflare Tunnel.

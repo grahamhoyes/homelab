@@ -21,7 +21,7 @@ spec:
         loadBalancerClass: tailscale
         annotations:
           tailscale.com/hostname: ingress-nginx-tailscale
-          external-dns.alpha.kubernetes.io/hostname: ingress-nginx-tailscale.hoyes.dev
+          external-dns.alpha.kubernetes.io/hostname: ingress-nginx-tailscale.hoyes.dev,*.ts.hoyes.dev
       ingressClass: nginx-tailscale
       ingressClassResource:
         name: nginx-tailscale
