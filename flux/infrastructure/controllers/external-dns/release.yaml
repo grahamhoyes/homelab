@@ -18,22 +18,22 @@ spec:
   values:
     policy: sync
     sources:
-    - ingress
-    - service
+      - ingress
+      - service
     txtOwnerId: ${CLUSTER_NAME}
 
     provider:
       name: cloudflare
 
     extraArgs:
-    - --cloudflare-dns-records-per-page=1000
-    # The regular nginx class uses a wildcard DNS record, so isn't managed by external-dns
-    - --ingress-class=nginx-cloudflare
-    - --ingress-class=nginx-tailscale
+      - --cloudflare-dns-records-per-page=1000
+      # The regular nginx class uses a wildcard DNS record, so isn't managed by external-dns
+      - --ingress-class=nginx-cloudflare
+      - --ingress-class=nginx-tailscale
 
     env:
-    - name: CF_API_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: cloudflare-api-token
-          key: cloudflare_api_token
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token
+            key: cloudflare_api_token
