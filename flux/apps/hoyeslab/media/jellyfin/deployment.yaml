@@ -27,6 +27,12 @@ spec:
         - name: jellyfin
           image: ghcr.io/linuxserver/jellyfin:10.11.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            appArmorProfile:
+              # Required for Intel OpenCL runtime to initialize as non-root user. Jellyfin runs as user abc,
+              # with UID and GID set via env vars below. Only needed for non-VPP OpenCL tone mapping, everything
+              # else (including VPP tone mapping) works without this.
+              type: Unconfined
           resources:
             requests:
               gpu.intel.com/i915: "1"
