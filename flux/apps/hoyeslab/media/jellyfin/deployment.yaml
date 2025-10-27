@@ -33,6 +33,10 @@ spec:
               # with UID and GID set via env vars below. Only needed for non-VPP OpenCL tone mapping, everything
               # else (including VPP tone mapping) works without this.
               type: Unconfined
+            capabilities:
+              add:
+                # Required for Intel OpenCL runtime to enumerate GPU devices as non-root
+                - SYS_ADMIN
           resources:
             requests:
               gpu.intel.com/i915: "1"

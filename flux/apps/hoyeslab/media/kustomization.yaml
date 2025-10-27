@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - certificate.yaml
-  - jellyfin/
+  - jellyfin/ks.yaml
   - jellyseerr/
