@@ -59,9 +59,9 @@ spec:
               name: jellyfin-media
           env:
             - name: PUID
-              value: ${quote}${NFS_UID}${quote}
+              value: "1029"  # service-access user on Graham-DS920 NFS server
             - name: PGID
-              value: ${quote}${NFS_GID}${quote}
+              value: "100"   # users group on Graham-DS920 NFS server
             - name: TZ
               value: "America/Toronto"
             - name: UMASK
