@@ -25,7 +25,7 @@ spec:
       serviceAccountName: jellyfin
       containers:
         - name: jellyfin
-          image: ghcr.io/linuxserver/jellyfin:10.11.1
+          image: ghcr.io/linuxserver/jellyfin:10.11.2
           imagePullPolicy: IfNotPresent
           securityContext:
             appArmorProfile:
