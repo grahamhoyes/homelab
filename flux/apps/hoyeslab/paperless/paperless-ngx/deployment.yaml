@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: paperless-ngx
-          image: ghcr.io/paperless-ngx/paperless-ngx:2.19.4
+          image: ghcr.io/paperless-ngx/paperless-ngx:2.19.5
           env:
             # Database settings
             - name: PAPERLESS_DBHOST
