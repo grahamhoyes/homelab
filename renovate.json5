@@ -1,22 +1,28 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":dependencyDashboard",
-    ":semanticCommits",
-    ":timezone(America/Toronto)",
-    ":prHourlyLimit4"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    ':dependencyDashboard',
+    ':semanticCommits',
+    ':timezone(America/Toronto)',
+    ':prHourlyLimit4',
   ],
-  "flux": {
-    "fileMatch": ["(^|/)flux/.+\\.ya?ml$"]
+  flux: {
+    managerFilePatterns: [
+      '/(^|/)flux/.+\\.ya?ml$/',
+    ],
   },
-  "kubernetes": {
-    "fileMatch": ["(^|/)flux/.+\\.ya?ml$"]
+  kubernetes: {
+    managerFilePatterns: [
+      '/(^|/)flux/.+\\.ya?ml$/',
+    ],
   },
-  "packageRules": [
+  packageRules: [
     {
-      "matchManagers": ["*"],
-      "minimumReleaseAge": "3 days"
-    }
-  ]
+      matchManagers: [
+        '*',
+      ],
+      minimumReleaseAge: '3 days',
+    },
+  ],
 }
