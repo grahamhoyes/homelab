@@ -1,0 +1,13 @@
+services:
+  upsnap:
+    container_name: upsnap
+    image: ghcr.io/seriousm4x/upsnap:5.2.4
+    network_mode: host
+    restart: always
+    volumes:
+      - ./data:/app/pb_data
+    environment:
+      TZ: America/Toronto
+    healthcheck:
+      test: curl -fs "http://localhost:5000/api/health" || exit 1
+      interval: 10s

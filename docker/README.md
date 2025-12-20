@@ -10,3 +10,4 @@ Renovate will update image versions in this directory, however I don't have anyt
 ## Services
 
 - **[versity-gateway](./versity-gateway/)** - S3-compatible API gateway backed by POSIX filesystem storage, running on my NAS
+- **[UpSnap](./upsnap)** - Send Wake on LAN commands through a web app
