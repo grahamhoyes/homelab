@@ -23,6 +23,11 @@
         '*',
       ],
       minimumReleaseAge: '3 days',
+      // https://docs.renovatebot.com/configuration-options/#internalchecksassuccess
+      // There are no other repository checks at the time of writing, so need to allow
+      // renovate's internal checks to make the PR. Automerge is not enabled, so this
+      // only creates the PR.
+      internalChecksAsSuccess: true,
     },
   ],
 }
