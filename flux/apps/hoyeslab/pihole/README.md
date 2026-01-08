@@ -144,12 +144,22 @@ Broadly, there are two ways to configure Pi-hole as your DNS server for all devi
         - See below, depending on the `externalTrafficPolicy` client IPs may not be visible regardless
     - Disadvantage: Will not work for devices with static network configurations
 
-I actually use both approaches simultaneously:
+> [!WARNING]
+> 🚨 **Avoid circular dependencies!** 🚨
+>
+> Avoid the case where the machines running Pi-Hole depend on Pi-hole for DNS. With HA you'll be able to recover from a subset of them going offline, but if the entire cluster needs to be taken offline it won't be able to come back up.
 
-- My default VLAN (where all my real devices live) and my IoT network has the Pi-hole DNS servers configured via DHCP, so I can debug issues on my devices and see what the IoT devices are up to.
-- The rest of my VLANs which mostly rely on static IPs use the router as their DNS server, which has Pi-hole as its upstream.
+I actually use a hybrid approach across my VLANs:
 
-This gives me a good balance of convenience and functionality. The only place it doesn't work is for devices on my default VLAN that have their DNS servers manually set to Cloudflare (mostly my work devices), which I'm fine with.
+- **Default VLAN** (where my real devices live) and **IoT network**: Pi-hole DNS servers (192.168.20.61, 192.168.20.62) configured via DHCP, so I can debug issues on my devices and see what the IoT devices are up to.
+- **Internal Services VLAN** (where the k3s cluster runs): VMs and Proxmox hosts use **Cloudflare DNS directly** (1.1.1.1, 1.0.0.1) to break the circular dependency.
+  - The infrastructure that Pi-hole depends on (hypervisors, VMs, cluster nodes) must not depend on Pi-hole for DNS.
+  - The cluster needs to be able to pull container images and start Pi-hole pods without DNS resolution depending on Pi-hole itself.
+  - I don't need Pi-hole filtering for infrastructure anyway—only for client devices.
+  - Breadcrumb: DNS servers for my k3s VMs are configured in [k3s_servers.yaml](/ansible/inventory/group_vars/k3s_servers.yaml) and [k3s_agents.yaml](/ansible/inventory/group_vars/k3s_agents.yaml)
+- **WAN/Internet interface**: Pi-hole configured as upstream DNS servers, which automatically applies to any devices or VLANs using the gateway as their DNS server.
+
+This gives me a good balance of convenience, functionality, and reliability. If the entire cluster goes down, it can recover without external intervention. The only place Pi-hole filtering doesn't apply is for devices on my default VLAN that have their DNS servers manually set to Cloudflare (work devices and some older physical hosts), which I'm fine with.
 
 See [Pi-hole's documentation on router setup](https://docs.pi-hole.net/routers/ubiquiti-usg/) for configuration instructions for your router.
 

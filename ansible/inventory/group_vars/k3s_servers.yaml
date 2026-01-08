@@ -5,5 +5,8 @@ vm_disk_gb: 50
 vlan_id: 20
 network_gateway: "192.168.20.1"
 netmask_cidr: 23
+# Use an external DNS server (cloudflare) to avoid circular dependencies when running
+# DNS servers (Pi-Hole) in k8s
 dns_servers:
-  - 192.168.2.1
+  - 1.1.1.1
+  - 1.0.0.1
