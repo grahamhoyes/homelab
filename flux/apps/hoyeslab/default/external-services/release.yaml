@@ -16,14 +16,12 @@ spec:
         namespace: flux-system
   values:
     services:
-      octopi:
-        ip: 192.168.2.6
-        port: 80
-        domain: octopi.hoyes.dev
-        ingressAnnotations:
-          nginx.ingress.kubernetes.io/proxy-body-size: 500m
-      homeassistant:
+      homeassistant-old:
         ip: 192.168.2.7
+        port: 8123
+        domain: ha-old.hoyes.dev
+      homeassistant:
+        ip: 192.168.21.10
         port: 8123
         domain: ha.hoyes.dev
       launcher:
