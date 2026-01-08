@@ -112,7 +112,7 @@ metal_lb_speaker_tag_version: v0.14.9
 metal_lb_controller_tag_version: v0.14.9
 
 # metallb ip range for load balancer
-metal_lb_ip_range: 192.168.20.60-192.168.21.99
+metal_lb_ip_range: 192.168.20.60-192.168.20.99
 
 # Group in the inventory file for server nodes
 group_name_master: k3s_servers
