@@ -6,3 +6,4 @@ resources:
   - database/
   - pihole/ks.yaml
   - paperless/ks.yaml
+  - home-automation/ks.yaml
