@@ -1,6 +1,6 @@
 services:
   versitygw:
-    image: ghcr.io/versity/versitygw:v1.3.1
+    image: ghcr.io/versity/versitygw:v1.4.0
     restart: always
     command: >-
       --iam-dir /config
