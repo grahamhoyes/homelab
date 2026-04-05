@@ -21,12 +21,12 @@ We can now put these into the cluster:
 kubectl apply -f namespace.yaml
 
 # 1Password vault and item name with the saved token and config file
-CONNECT_ITEM_PATH="op://infrastructure/1Password Connect Token"
+CONNECT_ITEM_PATH="op://Infrastructure/1Password Connect Token"
 
-# Create a secret from the credentials file, which needs to be base64 encoded
+# Create a secret from the credentials file
 kubectl create secret generic op-credentials \
   --namespace 1password \
-  --from-literal=1password-credentials.json=$(op read "${CONNECT_ITEM_PATH}/1password-credentials.json" | base64 --wrap=0)
+  --from-literal=1password-credentials.json=$(op read "${CONNECT_ITEM_PATH}/1password-credentials.json")
 
 # Create a secret for the token
 kubectl create secret generic onepassword-token \
