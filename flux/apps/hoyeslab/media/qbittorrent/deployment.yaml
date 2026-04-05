@@ -32,14 +32,6 @@ spec:
             capabilities:
               add:
                 - NET_ADMIN
-          # Clean up stale WireGuard ip rules from previous gluetun restarts.
-          # Kubernetes shares ip rules across the pod, so abrupt container exits
-          # leave orphaned rules that prevent the tunnel from re-establishing.
-          # See: https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/kubernetes.md
-          lifecycle:
-            postStart:
-              exec:
-                command: ["/bin/sh", "-c", "(ip rule del table 51820; ip -6 rule del table 51820) || true"]
           env:
             - name: TZ
               value: "America/Toronto"
@@ -88,10 +80,6 @@ spec:
             # NFS, Kubernetes services (sonarr, radarr, etc), and DNS
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: "10.43.0.0/16,10.52.0.0/16,192.168.2.0/24,192.168.20.0/24"
-            # Use plaintext DNS upstream — traffic is already encrypted by the
-            # VPN tunnel, and DNS-over-TLS (the default) fails due to MTU issues
-            - name: DNS_UPSTREAM_RESOLVER_TYPE
-              value: "plain"
           resources:
             requests:
               cpu: "500m"
