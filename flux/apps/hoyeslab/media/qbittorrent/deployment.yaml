@@ -32,14 +32,6 @@ spec:
             capabilities:
               add:
                 - NET_ADMIN
-          ports:
-            # Ports are defined on gluetun since it owns the network namespace
-            - name: qbt-http
-              containerPort: 8200
-              protocol: TCP
-            - name: prowlarr-http
-              containerPort: 9696
-              protocol: TCP
           env:
             - name: TZ
               value: "America/Toronto"
@@ -88,16 +80,12 @@ spec:
             # NFS, Kubernetes services (sonarr, radarr, etc), and DNS
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: "10.43.0.0/16,10.52.0.0/16,192.168.2.0/24,192.168.20.0/24"
-          volumeMounts:
-            - mountPath: /tmp/gluetun
-              name: gluetun-data
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
               cpu: "500m"
               memory: "256Mi"
+            limits:
+              memory: "1Gi"
           startupProbe:
             httpGet:
               path: /
@@ -119,6 +107,10 @@ spec:
       containers:
         - name: qbittorrent
           image: lscr.io/linuxserver/qbittorrent:5.1.4
+          ports:
+            - name: qbt-http
+              containerPort: 8200
+              protocol: TCP
           env:
             - name: PUID
               value: "1029"  # service-access user on Graham-DS920 NFS server
@@ -148,8 +140,14 @@ spec:
               cpu: "2000m"
               memory: "2Gi"
 
+        # Prowlarr is responsilbe for talking to indexers (on behalf of Radarr and Sonarr).
+        # It's in the qbittorrent pod so it can share the VPN connection.
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:2.3.5
+          ports:
+            - name: prowlarr-http
+              containerPort: 9696
+              protocol: TCP
           env:
             - name: PUID
               value: "1029"  # service-access user on Graham-DS920 NFS server
@@ -169,12 +167,10 @@ spec:
               cpu: "100m"
               memory: "256Mi"
             limits:
-              cpu: "500m"
+              cpu: "1000m"
               memory: "512Mi"
 
       volumes:
-        - name: gluetun-data
-          emptyDir: {}
         - name: qbittorrent-config
           persistentVolumeClaim:
             claimName: qbittorrent-config
