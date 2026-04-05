@@ -44,9 +44,11 @@ spec:
             - name: VPN_PORT_FORWARDING_PROVIDER
               value: "protonvpn"
             # Set forwarded port as the listen port in qbittorrent
+            # Uses --tries/--waitretry because qbittorrent starts after gluetun. This does not block the
+            # container startup probe, so qbittorrent will start and receive this eventually.
             - name: VPN_PORT_FORWARDING_UP_COMMAND
               value: |
-                /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8200/api/v2/app/setPreferences 2>&1'
+                /bin/sh -c 'wget -O- --retry-connrefused --tries=20 --waitretry=5 --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8200/api/v2/app/setPreferences 2>&1'
             # WireGuard credentials from 1Password
             - name: WIREGUARD_ENDPOINT_IP
               valueFrom:
@@ -87,21 +89,24 @@ spec:
             limits:
               memory: "1Gi"
           startupProbe:
-            httpGet:
-              path: /
-              port: 9999
+            exec:
+              command:
+                - /gluetun-entrypoint
+                - healthcheck
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 30
           livenessProbe:
-            httpGet:
-              path: /
-              port: 9999
+            exec:
+              command:
+                - /gluetun-entrypoint
+                - healthcheck
             periodSeconds: 30
           readinessProbe:
-            httpGet:
-              path: /
-              port: 9999
+            exec:
+              command:
+                - /gluetun-entrypoint
+                - healthcheck
             periodSeconds: 10
 
       containers:
