@@ -17,6 +17,10 @@
       '/(^|/)flux/.+\\.ya?ml$/',
     ],
   },
+  ignorePaths: [
+    // Flux upgrades are managed by a github action with the flux CLI
+    'flux/clusters/hoyeslab/flux-system/gotk-components.yaml',
+  ],
   packageRules: [
     {
       matchManagers: [
