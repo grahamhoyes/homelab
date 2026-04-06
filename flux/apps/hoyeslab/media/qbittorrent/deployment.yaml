@@ -1,0 +1,222 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: media
+  labels:
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/instance: qbittorrent
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbittorrent
+      app.kubernetes.io/instance: qbittorrent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qbittorrent
+        app.kubernetes.io/instance: qbittorrent
+    spec:
+      # Gluetun runs as a native sidecar (restartPolicy: Always in initContainers).
+      # It establishes the VPN tunnel before the main containers start.
+      # All containers in the pod share the network namespace, so all traffic
+      # from qbittorrent and prowlarr goes through the VPN.
+      initContainers:
+        - name: gluetun
+          image: qmcgaw/gluetun:v3.41.1
+          restartPolicy: Always
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          env:
+            - name: TZ
+              value: "America/Toronto"
+            - name: VPN_SERVICE_PROVIDER
+              value: "custom"
+            - name: VPN_TYPE
+              value: "wireguard"
+            - name: VPN_PORT_FORWARDING
+              value: "on"
+            - name: VPN_PORT_FORWARDING_PROVIDER
+              value: "protonvpn"
+            # Set forwarded port as the listen port in qbittorrent
+            # Uses --tries/--waitretry because qbittorrent starts after gluetun. This does not block the
+            # container startup probe, so qbittorrent will start and receive this eventually.
+            - name: VPN_PORT_FORWARDING_UP_COMMAND
+              value: |
+                /bin/sh -c 'wget -O- --retry-connrefused --tries=20 --waitretry=5 --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8200/api/v2/app/setPreferences 2>&1'
+            # WireGuard credentials from 1Password
+            - name: WIREGUARD_ENDPOINT_IP
+              valueFrom:
+                secretKeyRef:
+                  name: gluetun-qbittorrent
+                  key: endpoint_ip
+            - name: WIREGUARD_ENDPOINT_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: gluetun-qbittorrent
+                  key: endpoint_port
+            - name: WIREGUARD_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gluetun-qbittorrent
+                  key: public_key
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gluetun-qbittorrent
+                  key: private_key
+            - name: WIREGUARD_ADDRESSES
+              valueFrom:
+                secretKeyRef:
+                  name: gluetun-qbittorrent
+                  key: address
+            # Allow inbound cluster traffic to qBittorrent and Prowlarr UIs
+            - name: FIREWALL_INPUT_PORTS
+              value: "8200,9696"
+            # Outbound subnets in order: kubernetes service CIDR, kubernetes pod CIDR, default VLAN, services VLAN
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: "10.43.0.0/16,10.52.0.0/16,192.168.2.0/24,192.168.20.0/24"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "256Mi"
+            limits:
+              memory: "1Gi"
+          startupProbe:
+            exec:
+              command:
+                - /gluetun-entrypoint
+                - healthcheck
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            exec:
+              command:
+                - /gluetun-entrypoint
+                - healthcheck
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command:
+                - /gluetun-entrypoint
+                - healthcheck
+            periodSeconds: 10
+
+      containers:
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:5.1.4
+          ports:
+            - name: qbt-http
+              containerPort: 8200
+              protocol: TCP
+          env:
+            - name: PUID
+              value: "1029"  # service-access user on Graham-DS920 NFS server
+            - name: PGID
+              value: "100"   # users group on Graham-DS920 NFS server
+            - name: UMASK
+              value: "0022"
+            - name: TZ
+              value: "America/Toronto"
+            - name: WEBUI_PORT
+              value: "8200"
+            - name: DOCKER_MODS
+              value: "ghcr.io/themepark-dev/theme.park:qbittorrent"
+            - name: TP_THEME
+              value: "nord"
+          startupProbe:
+            httpGet:
+              path: /
+              port: qbt-http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /
+              port: qbt-http
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /config
+              name: qbittorrent-config
+            - mountPath: /defaults/qBittorrent.conf
+              name: qbittorrent-defaults
+              subPath: qBittorrent.conf
+            - mountPath: /data/torrents
+              name: media
+              subPath: torrents
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+
+        # Prowlarr is responsible for talking to indexers (on behalf of Radarr and Sonarr).
+        # It's in the qbittorrent pod so it can share the VPN connection.
+        - name: prowlarr
+          image: lscr.io/linuxserver/prowlarr:2.3.5
+          ports:
+            - name: prowlarr-http
+              containerPort: 9696
+              protocol: TCP
+          env:
+            - name: PUID
+              value: "1029"  # service-access user on Graham-DS920 NFS server
+            - name: PGID
+              value: "100"   # users group on Graham-DS920 NFS server
+            - name: TZ
+              value: "America/Toronto"
+            - name: DOCKER_MODS
+              value: "ghcr.io/themepark-dev/theme.park:prowlarr"
+            - name: TP_THEME
+              value: "nord"
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: prowlarr-http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: prowlarr-http
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: prowlarr-http
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /config
+              name: prowlarr-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+
+      volumes:
+        - name: qbittorrent-config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+        - name: qbittorrent-defaults
+          configMap:
+            name: qbittorrent-defaults
+        - name: prowlarr-config
+          persistentVolumeClaim:
+            claimName: prowlarr-config
+        - name: media
+          nfs:
+            server: ds920.hoyes.dev
+            path: /volume1/media

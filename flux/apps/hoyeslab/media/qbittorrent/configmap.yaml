@@ -1,0 +1,51 @@
+# This is the default configuration for qBittorrent that gets applied on first startup.
+# After first startup, the configuration is stored in a PersistentVolumeClaim and the data in this ConfigMap is not used.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qbittorrent-defaults
+  namespace: media
+data:
+  qBittorrent.conf: |
+    [AutoRun]
+    enabled=false
+    program=
+
+    [BitTorrent]
+    Session\AddTorrentStopped=false
+    Session\DefaultSavePath=/data/torrents
+    Session\DisableAutoTMMByDefault=false
+    Session\DisableAutoTMMTriggers\CategorySavePathChanged=false
+    Session\DisableAutoTMMTriggers\DefaultSavePathChanged=false
+    Session\Interface=tun0
+    Session\InterfaceName=tun0
+    Session\MaxActiveDownloads=20
+    Session\MaxActiveTorrents=30
+    Session\MaxActiveUploads=10
+    Session\Encryption=1
+    Session\Preallocation=true
+    Session\QueueingSystemEnabled=false
+    Session\ShareLimitAction=Stop
+    Session\TorrentContentLayout=Original
+    Session\uTPRateLimit=true
+
+    [Core]
+    AutoDeleteAddedTorrentFile=IfAdded
+
+    [LegalNotice]
+    Accepted=true
+
+    [Network]
+    PortForwardingEnabled=false
+
+    [Preferences]
+    Connection\UPnP=false
+    WebUI\Address=*
+    WebUI\Port=8200
+    WebUI\AlternativeUIEnabled=true
+    WebUI\RootFolder=/themepark
+    WebUI\CSRFProtection=false
+    WebUI\ClickjackingProtection=false
+    WebUI\LocalHostAuth=false
+    WebUI\MaxAuthenticationFailCount=0
+    WebUI\ServerDomains=*
