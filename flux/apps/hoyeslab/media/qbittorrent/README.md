@@ -5,6 +5,7 @@ This deployment runs three containers in a single pod:
 - **Gluetun** (sidecar): WireGuard VPN tunnel via ProtonVPN. All network traffic from the pod goes through the VPN.
 - **qBittorrent** — Download client. Gluetun automatically updates the listen port when the VPN forwarded port changes.
     - Available within the cluster at `http://qbittorrent.media.svc`
+    - On first run, the configuration file is loaded from [this configmap](./configmap.yaml). After loading, the configuration is copied into the config PVC and changes to the configmap will have no effect.
 - **Prowlarr** — Indexer manager. Shares the VPN connection so indexer traffic is also tunneled.
     - Available within the cluster at `http://prowlarr.media.svc`
 
