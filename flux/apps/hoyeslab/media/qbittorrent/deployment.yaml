@@ -78,8 +78,7 @@ spec:
             # Allow inbound cluster traffic to qBittorrent and Prowlarr UIs
             - name: FIREWALL_INPUT_PORTS
               value: "8200,9696"
-            # Allow outbound traffic to the cluster and local network for
-            # NFS, Kubernetes services (sonarr, radarr, etc), and DNS
+            # Outbound subnets in order: kubernetes service CIDR, kubernetes pod CIDR, default VLAN, services VLAN
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: "10.43.0.0/16,10.52.0.0/16,192.168.2.0/24,192.168.20.0/24"
           resources:
@@ -160,7 +159,7 @@ spec:
               cpu: "2000m"
               memory: "2Gi"
 
-        # Prowlarr is responsilbe for talking to indexers (on behalf of Radarr and Sonarr).
+        # Prowlarr is responsible for talking to indexers (on behalf of Radarr and Sonarr).
         # It's in the qbittorrent pod so it can share the VPN connection.
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:2.3.5
@@ -179,6 +178,23 @@ spec:
               value: "ghcr.io/themepark-dev/theme.park:prowlarr"
             - name: TP_THEME
               value: "nord"
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: prowlarr-http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: prowlarr-http
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: prowlarr-http
+            periodSeconds: 10
           volumeMounts:
             - mountPath: /config
               name: prowlarr-config
