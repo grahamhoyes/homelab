@@ -134,6 +134,9 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: qbittorrent-config
+            - mountPath: /defaults/qBittorrent.conf
+              name: qbittorrent-defaults
+              subPath: qBittorrent.conf
             - mountPath: /data/torrents
               name: media
               subPath: torrents
@@ -179,6 +182,9 @@ spec:
         - name: qbittorrent-config
           persistentVolumeClaim:
             claimName: qbittorrent-config
+        - name: qbittorrent-defaults
+          configMap:
+            name: qbittorrent-defaults
         - name: prowlarr-config
           persistentVolumeClaim:
             claimName: prowlarr-config

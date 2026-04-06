@@ -7,7 +7,7 @@ spec:
   type: ClusterIP
   ports:
     - name: http
-      port: 8200
+      port: 80
       targetPort: qbt-http
   selector:
     app.kubernetes.io/name: qbittorrent
@@ -22,7 +22,7 @@ spec:
   type: ClusterIP
   ports:
     - name: http
-      port: 9696
+      port: 80
       targetPort: prowlarr-http
   selector:
     app.kubernetes.io/name: qbittorrent
