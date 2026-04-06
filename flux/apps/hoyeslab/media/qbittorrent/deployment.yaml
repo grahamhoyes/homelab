@@ -131,6 +131,18 @@ spec:
               value: "ghcr.io/themepark-dev/theme.park:qbittorrent"
             - name: TP_THEME
               value: "nord"
+          startupProbe:
+            httpGet:
+              path: /
+              port: qbt-http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /
+              port: qbt-http
+            periodSeconds: 10
           volumeMounts:
             - mountPath: /config
               name: qbittorrent-config
