@@ -8,3 +8,4 @@ resources:
   - qbittorrent/ks.yaml
   - sonarr/ks.yaml
   - radarr/ks.yaml
+  - profilarr/ks.yaml

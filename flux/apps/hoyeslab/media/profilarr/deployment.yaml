@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: profilarr
+  namespace: media
+  labels:
+    app.kubernetes.io/name: profilarr
+    app.kubernetes.io/instance: profilarr
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: profilarr
+      app.kubernetes.io/instance: profilarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: profilarr
+        app.kubernetes.io/instance: profilarr
+    spec:
+      containers:
+        - name: profilarr
+          image: santiagosayshey/profilarr:v1.1.4
+          ports:
+            - name: http
+              containerPort: 6868
+              protocol: TCP
+          env:
+            - name: TZ
+              value: "America/Toronto"
+          volumeMounts:
+            - mountPath: /config
+              name: profilarr-config
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          livenessProbe:
+            initialDelaySeconds: 10
+            tcpSocket:
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 10
+            tcpSocket:
+              port: http
+
+      volumes:
+        - name: profilarr-config
+          persistentVolumeClaim:
+            claimName: profilarr-config
