@@ -7,7 +7,7 @@ spec:
   type: ClusterIP
   ports:
     - name: http
-      port: 8096
+      port: 80
       targetPort: http
   selector:
     app.kubernetes.io/name: jellyfin
