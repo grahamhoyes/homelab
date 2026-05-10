@@ -28,6 +28,10 @@ spec:
         ip: 192.168.2.20
         port: 2080
         domain: launch.hoyes.dev
+      lemonade:
+        ip: 192.168.2.13
+        port: 13305
+        domain: lemonade.hoyes.dev
 
     ingress:
       className: nginx
