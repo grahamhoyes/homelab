@@ -1,0 +1,156 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  releaseName: forgejo
+  interval: 10m
+  chart:
+    spec:
+      chart: forgejo
+      version: 17.1.0
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: forgejo
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: 1
+    strategy:
+      type: Recreate
+
+    image:
+      rootless: true
+      pullPolicy: IfNotPresent
+
+    # Run as DS920 service-access user (1029:100) for NFS share
+    podSecurityContext:
+      fsGroup: 100
+    containerSecurityContext:
+      runAsUser: 1029
+      runAsGroup: 100
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+        add:
+          - SETGID
+          - SETUID
+      seccompProfile:
+        type: RuntimeDefault
+
+    persistence:
+      enabled: true
+      # We provide our own NFS-backed PV+PVC (see pv.yaml)
+      create: false
+      claimName: forgejo-data
+
+    service:
+      ssh:
+        type: LoadBalancer
+        port: 22
+        externalTrafficPolicy: Local
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: git.hoyes.dev
+
+    ingress:
+      enabled: true
+      className: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+      hosts:
+        - host: code.hoyes.dev
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - code.hoyes.dev
+          secretName: hoyes-dev-tls
+
+    # Bootstrap the admin user from 1Password
+    gitea:
+      admin:
+        existingSecret: forgejo-admin
+        passwordMode: keepUpdated
+
+      additionalConfigFromEnvs:
+        # Database credentials from CNPG-managed secret
+        - name: FORGEJO__database__USER
+          valueFrom:
+            secretKeyRef:
+              name: forgejo-pg18-app
+              key: username
+        - name: FORGEJO__database__PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: forgejo-pg18-app
+              key: password
+        - name: FORGEJO__database__NAME
+          valueFrom:
+            secretKeyRef:
+              name: forgejo-pg18-app
+              key: dbname
+
+      config:
+        APP_NAME: "Forgejo: hoyeslab"
+        RUN_MODE: prod
+
+        server:
+          DOMAIN: code.hoyes.dev
+          ROOT_URL: https://code.hoyes.dev/
+          SSH_DOMAIN: git.hoyes.dev
+          SSH_PORT: 22
+          SSH_LISTEN_PORT: 2222
+          DISABLE_SSH: false
+          START_SSH_SERVER: true
+          LFS_START_SERVER: true
+
+        database:
+          DB_TYPE: postgres
+          HOST: forgejo-pg18-rw:5432
+          SSL_MODE: require
+
+        cache:
+          ADAPTER: redis
+          HOST: redis://forgejo-dragonfly:6379/0
+
+        session:
+          PROVIDER: redis
+          PROVIDER_CONFIG: redis://forgejo-dragonfly:6379/1
+
+        queue:
+          TYPE: redis
+          CONN_STR: redis://forgejo-dragonfly:6379/2
+
+        security:
+          INSTALL_LOCK: true
+          PASSWORD_HASH_ALGO: argon2
+
+        service:
+          DISABLE_REGISTRATION: true
+          REQUIRE_SIGNIN_VIEW: false
+          DEFAULT_KEEP_EMAIL_PRIVATE: true
+
+        repository:
+          DEFAULT_BRANCH: main
+          DEFAULT_PRIVATE: private
+
+        log:
+          LEVEL: info
+
+        actions:
+          ENABLED: true
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi

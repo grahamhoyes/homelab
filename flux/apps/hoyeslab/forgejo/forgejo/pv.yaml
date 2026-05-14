@@ -1,0 +1,41 @@
+# Using a PV for the forgejo NFS mount to have control over the mount options. See:
+# https://forgejo.org/docs/next/admin/installation/docker/#hosting-repository-data-on-remote-storage-systems
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: forgejo-data
+  labels:
+    app.kubernetes.io/name: forgejo
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - hard
+    - timeo=10
+    - retry=10
+    - vers=4.1
+  nfs:
+    server: ds920.hoyes.dev
+    # NVMe-backed volume
+    path: /volume2/data-fast/forgejo
+  claimRef:
+    namespace: forgejo
+    name: forgejo-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: forgejo-data
+  namespace: forgejo
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: forgejo-data

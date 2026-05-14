@@ -1,0 +1,13 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: forgejo-backup
+  namespace: forgejo
+spec:
+  schedule: '0 0 2 * * *'
+  backupOwnerReference: self
+  cluster:
+    name: forgejo-pg18
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
