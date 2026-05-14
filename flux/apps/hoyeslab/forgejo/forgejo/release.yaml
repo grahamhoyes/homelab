@@ -147,6 +147,11 @@ spec:
         actions:
           ENABLED: true
 
+        # See https://forgejo.org/docs/latest/admin/config-cheat-sheet/#indexer-indexer
+        # The default indexer type (bleve) is not compatible with HA
+        indexer:
+          REPO_INDEXER_ENABLED: true
+
     resources:
       requests:
         cpu: 100m

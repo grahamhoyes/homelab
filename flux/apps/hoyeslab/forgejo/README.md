@@ -87,7 +87,9 @@ Then log in at `https://code.hoyes.dev` with the admin credentials. If desired, 
 
 ## Limitations and Future Work
 
-- `replicaCount: 1` is enforced even though the storage layer supports HA. Running multiple replicas needs some additional Forgejo cron configuration to avoid duplicate work, and the chart itself warns against `replicaCount > 1` without those guards.
+- `replicaCount: 1` is enforced even though the storage layer supports HA
+  - The chart itself warns against `replicaCount > 1`
+  - The default indexer used, bleve, does not support HA. We would need to switch to elasticsearch.
 - `externalTrafficPolicy: Local` with a single replica means SSH and HTTPS traffic only land on the node currently running the Forgejo pod. A node failure breaks both until the pod reschedules and MetalLB re-elects. Same property as nginx-ingress today.
 - Forgejo Actions are enabled in the config but no runners are deployed yet. Need to deploy a runner with access to this Forgejo instance and a registration token from the admin UI.
 - The instance is private to my LAN today. To go public, add an Ingress with the `nginx-cloudflare` class (see [ingress-nginx README](/flux/infrastructure/controllers/ingress-nginx/README.md)), put a Cloudflare Access policy in front, and revisit `REQUIRE_SIGNIN_VIEW` and registration settings. Consider adding NetworkPolicies for namespace isolation at that point.
