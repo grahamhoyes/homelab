@@ -104,6 +104,7 @@ spec:
         server:
           DOMAIN: code.hoyes.dev
           ROOT_URL: https://code.hoyes.dev/
+          BUILTIN_SSH_SERVER_USER: git
           SSH_DOMAIN: git.hoyes.dev
           SSH_PORT: 22
           SSH_LISTEN_PORT: 2222
