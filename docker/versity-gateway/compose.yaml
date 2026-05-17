@@ -2,15 +2,23 @@ services:
   versitygw:
     image: ghcr.io/versity/versitygw:v1.4.1
     restart: always
-    command: >-
-      --iam-dir /config
-      posix
-      /data/buckets
-      --versioning-dir /data/versions
-      --bucketlinks
     ports:
       - "7070:7070"
+      - "7071:7071"
+      - "7072:7072"
     volumes:
       - /volume1/object_storage/versitygw:/data
       - ./config:/config
+    # Secret keys
     env_file: .env
+    environment:
+      VGW_IAM_DIR: /config
+      VGW_BACKEND: posix
+      VGW_BACKEND_ARGS: /data/buckets
+      VGW_VERSIONING_DIR: /data/versions
+      VGW_BUCKET_LINKS: "true"
+      VGW_ADMIN_PORT: ":7071"
+      VGW_WEBUI_PORT: ":7072"
+      VGW_WEBUI_ADMIN_GATEWAYS: "https://versitygw-admin.hoyes.dev"
+      VGW_WEBUI_GATEWAYS: "https://s3.hoyes.dev"
+      VGW_CORS_ALLOW_ORIGIN: "https://versitygw.hoyes.dev"
