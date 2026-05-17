@@ -1,11 +1,21 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: jellyseerr
+  name: seerr
   namespace: media
 spec:
   ingressClassName: nginx
   rules:
+    - host: seerr.hoyes.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seerr
+                port:
+                  name: http
     - host: jellyseerr.hoyes.dev
       http:
         paths:
@@ -13,10 +23,11 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: jellyseerr
+                name: seerr
                 port:
                   name: http
   tls:
     - hosts:
+        - seerr.hoyes.dev
         - jellyseerr.hoyes.dev
       secretName: hoyes-dev-tls
