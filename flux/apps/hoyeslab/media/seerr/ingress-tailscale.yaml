@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seerr-tailscale
+  namespace: media
+spec:
+  ingressClassName: nginx-tailscale
+  rules:
+    - host: request.ts.hoyes.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seerr
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - request.ts.hoyes.dev
+      secretName: ts-hoyes-dev-tls

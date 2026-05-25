@@ -1,3 +1,4 @@
+# This creates a dedicated jellyfin device on the tailnet
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -13,3 +14,30 @@ spec:
   tls:
     - hosts:
         - jellyfin
+
+---
+
+# This exposes jellyfin via the dedicated nginx-tailscale controller,
+# which lets us use custom DNS records
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jellyfin-tailscale-watch
+  namespace: media
+spec:
+  ingressClassName: nginx-tailscale
+  rules:
+    - host: watch.ts.hoyes.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jellyfin
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - watch.ts.hoyes.dev
+      secretName: ts-hoyes-dev-tls

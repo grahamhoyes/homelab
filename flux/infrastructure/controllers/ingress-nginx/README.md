@@ -71,26 +71,27 @@ To expose a service at a custom domain (e.g., `service.hoyes.dev`), create a CNA
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: tailscale-service
+  name: tailscale-<service>
+  namespace: <namespace>
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: service.hoyes.dev
+    external-dns.alpha.kubernetes.io/hostname: <service>.hoyes.dev
     external-dns.alpha.kubernetes.io/target: ingress-nginx-tailscale.hoyes.dev
 spec:
   ingressClassName: nginx-tailscale
   rules:
-    - host: service.hoyes.dev
+    - host: <service>.hoyes.dev
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: tailscale-service
+                name: <service>
                 port:
                   name: http
   tls:
     - hosts:
-        - service.hoyes.dev
+        - <service>.hoyes.dev
       secretName: hoyes-dev-tls  # Wildcard cert for *.hoyes.dev (created by cert-manager). Assumes the secret already exists.
 ```
 
@@ -104,23 +105,24 @@ Without external-dns annotations, the service will be available at `service.ts.h
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: tailscale-service
+  name: tailscale-<service>
+  namespace: <namespace>
 spec:
   ingressClassName: nginx-tailscale
   rules:
-    - host: service.ts.hoyes.dev
+    - host: <service>.ts.hoyes.dev
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: tailscale-service
+                name: <service>
                 port:
                   name: http
   tls:
     - hosts:
-        - service.ts.hoyes.dev
+        - <service>.ts.hoyes.dev
       secretName: ts-hoyes-dev-tls  # Wildcard cert for *.ts.hoyes.dev (should be created similarly)
 ```
 
