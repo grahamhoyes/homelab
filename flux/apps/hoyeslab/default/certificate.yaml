@@ -11,3 +11,19 @@ spec:
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ts-hoyes-dev-tls
+  namespace: default
+spec:
+  secretName: ts-hoyes-dev-tls
+  dnsNames:
+    - "ts.hoyes.dev"
+    - "*.ts.hoyes.dev"
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
