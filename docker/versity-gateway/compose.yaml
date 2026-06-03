@@ -1,6 +1,6 @@
 services:
   versitygw:
-    image: ghcr.io/versity/versitygw:v1.4.1
+    image: ghcr.io/versity/versitygw:v1.5.0
     restart: always
     ports:
       - "7070:7070"
