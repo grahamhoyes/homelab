@@ -162,7 +162,7 @@ spec:
         # Prowlarr is responsible for talking to indexers (on behalf of Radarr and Sonarr).
         # It's in the qbittorrent pod so it can share the VPN connection.
         - name: prowlarr
-          image: ghcr.io/linuxserver/prowlarr:2.3.5
+          image: ghcr.io/linuxserver/prowlarr:2.4.0
           ports:
             - name: prowlarr-http
               containerPort: 9696
