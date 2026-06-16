@@ -66,6 +66,5 @@ spec:
         # Mount the entire media share so sonarr can hard link
         # from /data/torrents/ to /data/media/tv/
         - name: media
-          nfs:
-            server: ds920.hoyes.dev
-            path: /volume1/media
+          persistentVolumeClaim:
+            claimName: media

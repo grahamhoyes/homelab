@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - certificate.yaml
+  - pv.yaml
   - jellyfin/ks.yaml
   - seerr/ks.yaml
   - qbittorrent/ks.yaml

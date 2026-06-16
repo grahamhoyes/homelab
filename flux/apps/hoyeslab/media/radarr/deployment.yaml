@@ -66,6 +66,5 @@ spec:
         # Mount the entire media share so radarr can hard link
         # from /data/torrents/ to /data/media/movies/
         - name: media
-          nfs:
-            server: ds920.hoyes.dev
-            path: /volume1/media
+          persistentVolumeClaim:
+            claimName: media
