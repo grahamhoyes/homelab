@@ -217,6 +217,5 @@ spec:
           persistentVolumeClaim:
             claimName: prowlarr-config
         - name: media
-          nfs:
-            server: ds920.hoyes.dev
-            path: /volume1/media
+          persistentVolumeClaim:
+            claimName: media

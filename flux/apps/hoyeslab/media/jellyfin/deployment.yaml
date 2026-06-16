@@ -84,9 +84,8 @@ spec:
             claimName: jellyfin-config
         # Media volume is an NFS share
         - name: jellyfin-media
-          nfs:
-            server: ds920.hoyes.dev
-            path: /volume1/media
+          persistentVolumeClaim:
+            claimName: media
         # Transcode volume is an emptyDir. Could make in-memory if desired.
         - name: jellyfin-transcode
           emptyDir: {}

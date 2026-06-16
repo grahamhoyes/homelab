@@ -17,13 +17,14 @@ data:
     Session\DisableAutoTMMByDefault=false
     Session\DisableAutoTMMTriggers\CategorySavePathChanged=false
     Session\DisableAutoTMMTriggers\DefaultSavePathChanged=false
+    Session\DiskIOType=Posix
     Session\Interface=tun0
     Session\InterfaceName=tun0
     Session\MaxActiveDownloads=20
     Session\MaxActiveTorrents=30
     Session\MaxActiveUploads=10
     Session\Encryption=1
-    Session\Preallocation=true
+    Session\Preallocation=false
     Session\QueueingSystemEnabled=false
     Session\ShareLimitAction=Stop
     Session\TorrentContentLayout=Original

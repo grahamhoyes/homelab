@@ -1,0 +1,54 @@
+# Shared PV/PVC for the /volume1/media DS920 NFS export, consumed by qbittorrent, radarr,
+# sonarr, and jellyfin. We use a static PV (instead of inline `spec.volumes.nfs`) so
+# we can control the mount options.
+#
+# NFS transport options (nconnect/rsize/wsize) are negotiated on the first mount to a
+# server on each node and reused by subsequent mounts. So every consumer of this export
+# must mount with the same options for them to be effective and consistent - hence a
+# single shared PV referenced by all media apps.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: media
+  labels:
+    app.kubernetes.io/name: media
+spec:
+  # Capacity is not enforced for NFS, but required on the PV/PVC spec nonetheless. We
+  # don't need to change this if the NAS gets more storage.
+  capacity:
+    storage: 36Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+    - noatime
+    # Open multiple TCP connections to the NAS for better throughput
+    - nconnect=4
+    # Larger read/write sizes for media I/O (1Mi). The client negotiates down if the
+    # server won't honor them. Synology's NFS UI lets you specify up to 32 KB as the
+    # default size, but it can negotiate higher to 128 KiB in practice.
+    - rsize=1048576
+    - wsize=1048576
+  nfs:
+    server: ds920.hoyes.dev
+    path: /volume1/media
+  claimRef:
+    namespace: media
+    name: media
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 36Ti
+  volumeName: media
