@@ -134,9 +134,12 @@ spec:
             httpGet:
               path: /
               port: qbt-http
+            # The theme.park DOCKER_MOD re-downloads and re-themes the WebUI on every
+            # start (often 30s+), before qbittorrent binds the port. Give it a generous
+            # window (75s) so a slow mod init doesn't kill the container.
             initialDelaySeconds: 10
             periodSeconds: 5
-            failureThreshold: 6
+            failureThreshold: 15
           readinessProbe:
             httpGet:
               path: /
