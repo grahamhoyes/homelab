@@ -1,0 +1,32 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: openwebui-pg18
+  namespace: openwebui
+spec:
+  # Single instance, with the caveat that data is node-local so there's no HA.
+  # Data can be restored from the barman cloud backup in the event of full node failure.
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.4-standard-trixie
+
+  enableSuperuserAccess: true
+
+  storage:
+    storageClass: longhorn-local
+    size: 10Gi
+
+  bootstrap:
+    initdb:
+      database: openwebui
+      # Open WebUI stores its RAG embeddings in pgvector (VECTOR_DB=pgvector).
+      # pgvector is available in the standard CNPG image, we just need to create
+      # the extension.
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS vector;
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: versitygw
+        serverName: openwebui-pg18-001

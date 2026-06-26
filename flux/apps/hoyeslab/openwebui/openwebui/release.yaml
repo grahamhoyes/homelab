@@ -1,0 +1,115 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: open-webui
+  namespace: openwebui
+spec:
+  releaseName: open-webui
+  interval: 10m
+  chart:
+    spec:
+      chart: open-webui
+      version: 14.8.0
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: open-webui
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: 1
+
+    # Models hosted via Lemonade on my Framework Desktop
+    ollama:
+      enabled: false
+    pipelines:
+      enabled: false
+
+    # Lemonade runs as a systemd service on my Framework Desktop. Won't always be available,
+    # but can be woken on LAN from Home Assistant if needed.
+    openaiBaseApiUrl: "http://192.168.2.13:13305/api/v1"
+    # Lemonade does not require auth, this is a placeholder the OpenAI client needs
+    openaiApiKey: "none"
+
+    # Run as DS920 service-access user (1029:100) for NFS share
+    podSecurityContext:
+      fsGroup: 100
+    containerSecurityContext:
+      runAsUser: 1029
+      runAsGroup: 100
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+
+    # NFS-backed data dir (uploads + embedding-model cache), see pv.yaml
+    persistence:
+      enabled: true
+      existingClaim: openwebui-data
+
+    # DATABASE_URL is injected from the CNPG-managed secret below
+    databaseUrl: ""
+
+    # Websocket coordination via the Dragonfly instance
+    websocket:
+      enabled: true
+      manager: redis
+      url: "redis://openwebui-dragonfly:6379/0"
+      redis:
+        # Use our Dragonfly, not the chart's bundled redis
+        enabled: false
+
+    ingress:
+      enabled: true
+      class: nginx
+      annotations:
+        # Allow larger document uploads
+        nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+      host: chat.hoyes.dev
+      tls: true
+      existingSecret: hoyes-dev-tls
+
+    extraEnvVars:
+      # Database connection string from the CNPG-managed app secret. The `uri` key
+      # is a full postgresql://user:pass@openwebui-pg18-rw:5432/openwebui URL.
+      - name: DATABASE_URL
+        valueFrom:
+          secretKeyRef:
+            name: openwebui-pg18-app
+            key: uri
+      - name: VECTOR_DB
+        value: pgvector
+
+      # Secret key for sessions and encryption (see secret.yaml)
+      - name: WEBUI_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: openwebui
+            key: secret_key
+
+      - name: CORS_ALLOW_ORIGIN
+        value: "https://chat.hoyes.dev"
+
+      # The default HOME is /root, which won't be writeable by the 1029:100
+      # user we're running as for NFS access. There shouldn't be any significant
+      # writes there for cache, but redirect it to the NFS mount just in case.
+      - name: HOME
+        value: /app/backend/data
+      - name: PYTHONDONTWRITEBYTECODE
+        value: "1"
+
+      # Opt out of telemetry/analytics
+      - name: ANONYMIZED_TELEMETRY
+        value: "false"
+      - name: SCARF_NO_ANALYTICS
+        value: "true"
+      - name: DO_NOT_TRACK
+        value: "true"
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 2Gi

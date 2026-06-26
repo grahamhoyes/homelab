@@ -8,3 +8,4 @@ resources:
   - paperless/ks.yaml
   - home-automation/ks.yaml
   - forgejo/ks.yaml
+  - openwebui/ks.yaml
