@@ -33,13 +33,18 @@ spec:
     # Lemonade does not require auth, this is a placeholder the OpenAI client needs
     openaiApiKey: "none"
 
-    # Run as DS920 service-access user (1029:100) for NFS share
+    # The default image only supports running as root, since it writes to some in-container
+    # directories. We could build our own image in the future, see:
+    # https://docs.openwebui.com/getting-started/advanced-topics/hardening/#non-root-execution
+    # For now, we still set the GID so files on the NFS share are owned by the users group.
+    # The user will still be root (uid 0), the group will be users (100).
     podSecurityContext:
       fsGroup: 100
     containerSecurityContext:
-      runAsUser: 1029
+      # Un-comment these if we switch to rootless
+      # runAsUser: 1029
+      # runAsNonRoot: true
       runAsGroup: 100
-      runAsNonRoot: true
       allowPrivilegeEscalation: false
 
     # NFS-backed data dir (uploads + embedding-model cache), see pv.yaml
@@ -89,14 +94,6 @@ spec:
 
       - name: CORS_ALLOW_ORIGIN
         value: "https://chat.hoyes.dev"
-
-      # The default HOME is /root, which won't be writeable by the 1029:100
-      # user we're running as for NFS access. There shouldn't be any significant
-      # writes there for cache, but redirect it to the NFS mount just in case.
-      - name: HOME
-        value: /app/backend/data
-      - name: PYTHONDONTWRITEBYTECODE
-        value: "1"
 
       # Opt out of telemetry/analytics
       - name: ANONYMIZED_TELEMETRY
