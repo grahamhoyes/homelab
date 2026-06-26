@@ -1,0 +1,42 @@
+# SSD NFS-backed PV for Open WebUI's data dir (/app/backend/data).
+# Contains upload source documents and the embedding-model cache.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: openwebui-data
+  labels:
+    app.kubernetes.io/name: open-webui
+spec:
+  capacity:
+    # Capacity is ignored for NFS mounts, but needs to be set anyway
+    storage: 20Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - hard
+    - timeo=10
+    - retry=10
+    - vers=4.1
+  nfs:
+    server: ds920.hoyes.dev
+    # NVMe-backed volume
+    path: /volume2/data-fast/openwebui
+  claimRef:
+    namespace: openwebui
+    name: openwebui-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openwebui-data
+  namespace: openwebui
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 20Gi
+  volumeName: openwebui-data

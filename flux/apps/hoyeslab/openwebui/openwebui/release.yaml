@@ -1,0 +1,112 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: open-webui
+  namespace: openwebui
+spec:
+  releaseName: open-webui
+  interval: 10m
+  chart:
+    spec:
+      chart: open-webui
+      version: 14.8.0
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: open-webui
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: 1
+
+    # Models hosted via Lemonade on my Framework Desktop
+    ollama:
+      enabled: false
+    pipelines:
+      enabled: false
+
+    # Lemonade runs as a systemd service on my Framework Desktop. Won't always be available,
+    # but can be woken on LAN from Home Assistant if needed.
+    openaiBaseApiUrl: "http://192.168.2.13:13305/api/v1"
+    # Lemonade does not require auth, this is a placeholder the OpenAI client needs
+    openaiApiKey: "none"
+
+    # The default image only supports running as root, since it writes to some in-container
+    # directories. We could build our own image in the future, see:
+    # https://docs.openwebui.com/getting-started/advanced-topics/hardening/#non-root-execution
+    # For now, we still set the GID so files on the NFS share are owned by the users group.
+    # The user will still be root (uid 0), the group will be users (100).
+    podSecurityContext:
+      fsGroup: 100
+    containerSecurityContext:
+      # Un-comment these if we switch to rootless
+      # runAsUser: 1029
+      # runAsNonRoot: true
+      runAsGroup: 100
+      allowPrivilegeEscalation: false
+
+    # NFS-backed data dir (uploads + embedding-model cache), see pv.yaml
+    persistence:
+      enabled: true
+      existingClaim: openwebui-data
+
+    # DATABASE_URL is injected from the CNPG-managed secret below
+    databaseUrl: ""
+
+    # Websocket coordination via the Dragonfly instance
+    websocket:
+      enabled: true
+      manager: redis
+      url: "redis://openwebui-dragonfly:6379/0"
+      redis:
+        # Use our Dragonfly, not the chart's bundled redis
+        enabled: false
+
+    ingress:
+      enabled: true
+      class: nginx
+      annotations:
+        # Allow larger document uploads
+        nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+      host: chat.hoyes.dev
+      tls: true
+      existingSecret: hoyes-dev-tls
+
+    extraEnvVars:
+      # Database connection string from the CNPG-managed app secret. The `uri` key
+      # is a full postgresql://user:pass@openwebui-pg18-rw:5432/openwebui URL.
+      - name: DATABASE_URL
+        valueFrom:
+          secretKeyRef:
+            name: openwebui-pg18-app
+            key: uri
+      - name: VECTOR_DB
+        value: pgvector
+
+      # Secret key for sessions and encryption (see secret.yaml)
+      - name: WEBUI_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: openwebui
+            key: secret_key
+
+      - name: CORS_ALLOW_ORIGIN
+        value: "https://chat.hoyes.dev"
+
+      # Opt out of telemetry/analytics
+      - name: ANONYMIZED_TELEMETRY
+        value: "false"
+      - name: SCARF_NO_ANALYTICS
+        value: "true"
+      - name: DO_NOT_TRACK
+        value: "true"
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 2Gi
