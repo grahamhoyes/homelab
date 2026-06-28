@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: sonarr
-          image: ghcr.io/linuxserver/sonarr:4.0.17
+          image: ghcr.io/linuxserver/sonarr:4.0.19
           ports:
             - name: http
               containerPort: 8989
