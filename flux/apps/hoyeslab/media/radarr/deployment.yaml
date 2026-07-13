@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: radarr
-          image: ghcr.io/linuxserver/radarr:6.2.1
+          image: ghcr.io/linuxserver/radarr:6.3.0
           ports:
             - name: http
               containerPort: 7878
