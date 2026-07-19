@@ -110,7 +110,7 @@ spec:
 
       containers:
         - name: qbittorrent
-          image: ghcr.io/linuxserver/qbittorrent:5.2.2
+          image: ghcr.io/linuxserver/qbittorrent:5.2.3
           ports:
             - name: qbt-http
               containerPort: 8200
