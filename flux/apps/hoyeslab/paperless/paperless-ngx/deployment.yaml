@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: paperless-ngx
-          image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.0.2
           env:
             # Database settings
             - name: PAPERLESS_DBHOST
@@ -72,7 +72,7 @@ spec:
               value: "100"
 
             # Poll for new documents every 10 seconds, since NFS doesn't support inotify
-            - name: PAPERLESS_CONSUMER_POLLING
+            - name: PAPERLESS_CONSUMER_POLLING_INTERVAL
               value: "10"
             - name: PAPERLESS_CONSUMER_RECURSIVE
               value: "true"
