@@ -26,7 +26,7 @@ spec:
       # from qbittorrent and prowlarr goes through the VPN.
       initContainers:
         - name: gluetun
-          image: qmcgaw/gluetun:v3.41.1
+          image: qmcgaw/gluetun:v3.41.3
           restartPolicy: Always
           securityContext:
             capabilities:
