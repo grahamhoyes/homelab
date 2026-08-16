@@ -37,7 +37,7 @@ Both virtual disks reside on the host's NVMe SSD via Proxmox `local-lvm`. Contro
 
 - **Schedule:** Weekly (Sunday at midnight)
 - **Retention:** 18 backups (~4 months)
-- **Target:** `nfs://ds920.hoyes.dev:/volume1/backups/longhorn`
+- **Target:** `nfs://ds920.hoyes.dev:/volume1/app-backups/longhorn`
 - Full volume backups stored on my Synology DS920 NAS
 - Note: the NFS share must have "Allow connections from non-privileged ports" enabled (see comment in [`release.yaml`](../../controllers/longhorn/release.yaml))
 

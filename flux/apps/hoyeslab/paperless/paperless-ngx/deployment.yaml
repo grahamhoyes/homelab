@@ -132,7 +132,7 @@ spec:
         - name: paperless-export
           nfs:
             server: ds920.hoyes.dev
-            path: /volume1/backups/apps/paperless-ngx
+            path: /volume1/app-backups/apps/paperless-ngx
         # Data volume for auxiliary data
         - name: paperless-data
           persistentVolumeClaim:

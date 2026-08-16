@@ -26,7 +26,7 @@ spec:
       # Note: Longhorn, for whatever reason, makes connections from unprivileged ports (unlike
       # regular kubernetes NFS volumes). On the NFS Permissions for the share on Synology,
       # need to enable "Allow connections from non-privileged ports".
-      backupTarget: "nfs://ds920.hoyes.dev:/volume1/backups/longhorn"
+      backupTarget: "nfs://ds920.hoyes.dev:/volume1/app-backups/longhorn"
     ingress:
       enabled: true
       tls: true
