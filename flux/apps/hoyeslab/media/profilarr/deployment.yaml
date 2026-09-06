@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: profilarr
-          image: santiagosayshey/profilarr:v1.1.4
+          image: santiagosayshey/profilarr:v1.1.5
           ports:
             - name: http
               containerPort: 6868
