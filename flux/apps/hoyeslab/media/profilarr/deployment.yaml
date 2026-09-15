@@ -20,16 +20,48 @@ spec:
         app.kubernetes.io/name: profilarr
         app.kubernetes.io/instance: profilarr
     spec:
+      initContainers:
+        - name: parser
+          restartPolicy: Always
+          image: ghcr.io/dictionarry-hub/profilarr-parser:2.2.0
+          ports:
+            - name: parser
+              containerPort: 5000
+              protocol: TCP
+          startupProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 6
+            httpGet:
+              path: /health
+              port: parser
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
       containers:
         - name: profilarr
-          image: santiagosayshey/profilarr:v1.1.4
+          image: ghcr.io/dictionarry-hub/profilarr:2.2.0
           ports:
             - name: http
               containerPort: 6868
               protocol: TCP
           env:
+            - name: PUID
+              value: "1029"
+            - name: PGID
+              value: "100"
             - name: TZ
               value: "America/Toronto"
+            - name: ORIGIN
+              value: "https://profilarr.hoyes.dev"
+            - name: PARSER_HOST
+              value: "localhost"
+            - name: PARSER_PORT
+              value: "5000"
           volumeMounts:
             - mountPath: /config
               name: profilarr-config
