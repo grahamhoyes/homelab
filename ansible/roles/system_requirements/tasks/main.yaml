@@ -36,7 +36,6 @@
       - nfs-common
       - bridge-utils
       - nvme-cli
-      - "linux-modules-extra-{{ ansible_kernel }}"
 
 - name: Load required kernel modules
   modprobe:

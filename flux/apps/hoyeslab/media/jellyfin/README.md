@@ -126,7 +126,7 @@ Some additional things to note that helped me get GPU transcoding working in my 
 - The [configure-proxmox.yaml ansible playbook](/ansible/configure-proxmox.yaml) configures IOMMU settings in GRUB on the Proxmox hosts
 - As described in the [ansible directory readme](/ansible/), a resource mapping is used in Proxmox to make the iGPU PCI device available to the VMs
 - A number of packages and kernel updates are applied in the [VM system requirements task](/ansible/roles/system_requirements/tasks/main.yaml)
-  - `linux-modules-extra-<kernel version>` is required
   - `linux-generic-hwe-24.04` to get an up to date kernel (for Ubuntu 24.04).
+  - Prior to kernel 7.x series, `linux-modules-extra-<kernel version>` is required. With the 7.x series, the necessary modules are available by default.
     - There are occasional incompatibilities with the [Intel Compute Runtime](https://github.com/intel/compute-runtime) and the `jellyfin-opencl-intel` linuxserver mod that may necessitate this.
-    - In particular, I found that the combination of the latest Intel Compute Runtime ([release 25.13.33276.16](https://github.com/intel/compute-runtime/releases/tag/25.13.33276.16) at the time of writing), kernel 6.8.0 on Ubuntu 24.04.02, and the i7-13700 were incompatible, so I run kernel `6.11.0-25` now.
+    - In particular, I found that the combination of the latest Intel Compute Runtime ([release 25.13.33276.16](https://github.com/intel/compute-runtime/releases/tag/25.13.33276.16) at the time of writing), kernel 6.8.0 on Ubuntu 24.04.02, and the i7-13700 were incompatible, but kernel `6.11.0-25` and above worked.
