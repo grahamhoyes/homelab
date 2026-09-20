@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: pihole
-          image: ghcr.io/pi-hole/pihole:2026.07.2
+          image: ghcr.io/pi-hole/pihole:2026.09.0
           ports:
             - containerPort: 53
               protocol: TCP
