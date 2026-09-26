@@ -28,6 +28,16 @@ spec:
         - name: gluetun
           image: qmcgaw/gluetun:v3.41.3
           restartPolicy: Always
+          # Sidecar restarts reuse the pod network namespace. In a gluetun crash,
+          # IP rules aren't removed, so a restart fails trying to re-add the rule.
+          # Clear any stale rules before starting.
+          command:
+            - /bin/sh
+            - -c
+            - |
+              ip rule del table 51820 2>/dev/null
+              ip -6 rule del table 51820 2>/dev/null
+              exec /gluetun-entrypoint
           securityContext:
             capabilities:
               add:
