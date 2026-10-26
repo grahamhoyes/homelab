@@ -1,0 +1,136 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: immich
+  namespace: immich
+spec:
+  releaseName: immich
+  interval: 10m
+  chart:
+    spec:
+      chart: immich
+      version: 0.13.4
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: immich
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  values:
+    # Shared by the server and machine-learning components
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              REDIS_HOSTNAME: immich-dragonfly
+              DB_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: immich-pg18-app
+                    key: uri
+              TZ: America/Toronto
+
+    immich:
+      persistence:
+        library:
+          existingClaim: immich-library
+      # TODO: Set configuration here after playing around in the UI
+      configuration: {}
+        # storageTemplate:
+        #   enabled: true
+        #   template: "{{y}}/{{MM}}/{{filename}}"
+
+    server:
+      defaultPodOptions:
+        # Run as DS920 service-access user for NFS share
+        securityContext:
+          runAsUser: 1029
+          runAsGroup: 100
+          runAsNonRoot: true
+
+      # Under `server` rather than top-level, which would also mount these into the
+      # machine-learning pod. The library volume (/data) is set by the chart from
+      # immich.persistence.library, see pv.yaml.
+      persistence:
+        # Thumbnails and encoded videos on the NVMe-backed share
+        thumbs:
+          type: nfs
+          server: ds920.hoyes.dev
+          path: /volume2/data-fast/immich/thumbs
+          globalMounts:
+            - path: /data/thumbs
+        encoded-video:
+          type: nfs
+          server: ds920.hoyes.dev
+          path: /volume2/data-fast/immich/encoded-video
+          globalMounts:
+            - path: /data/encoded-video
+        # Immich's own database dumps, not photo backups. Technically redundant with
+        # CNPG backups, could remove to save space.
+        backups:
+          type: nfs
+          server: ds920.hoyes.dev
+          path: /volume1/app-backups/immich
+          globalMounts:
+            - path: /data/backups
+        # Synology Photos backups and older photo dumps, added as an external library at
+        # /external/graham
+        external-graham:
+          type: nfs
+          server: ds920.hoyes.dev
+          path: /volume1/homes/Graham/Photos
+          globalMounts:
+            - path: /external/graham
+              readOnly: true
+
+      ingress:
+        main:
+          enabled: true
+          className: nginx
+          annotations:
+            # Remove the body limit on file uploads
+            nginx.ingress.kubernetes.io/proxy-body-size: "0"
+          hosts:
+            - host: immich.hoyes.dev
+              paths:
+                - path: /
+                  service:
+                    identifier: main
+          tls:
+            - hosts:
+                - immich.hoyes.dev
+              secretName: hoyes-dev-tls
+
+      controllers:
+        main:
+          containers:
+            main:
+              image:
+                repository: ghcr.io/immich-app/immich-server
+                tag: v3.3.5
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+                limits:
+                  memory: 4Gi
+
+    machine-learning:
+      controllers:
+        main:
+          containers:
+            main:
+              image:
+                repository: ghcr.io/immich-app/immich-machine-learning
+                tag: v3.3.5
+              env:
+                MACHINE_LEARNING_MODEL_REVISION: v2
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 1Gi
+                limits:
+                  memory: 4Gi

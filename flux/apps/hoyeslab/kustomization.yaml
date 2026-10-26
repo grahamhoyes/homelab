@@ -9,3 +9,4 @@ resources:
   - home-automation/ks.yaml
   - forgejo/ks.yaml
   - openwebui/ks.yaml
+  - immich/ks.yaml

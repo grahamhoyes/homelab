@@ -1,0 +1,19 @@
+apiVersion: dragonflydb.io/v1alpha1
+kind: Dragonfly
+metadata:
+  name: immich-dragonfly
+  namespace: immich
+spec:
+  replicas: 1
+
+  args:
+    - --proactor_threads=2
+    # Immich uses BullMQ for its job queue.
+    # See https://www.dragonflydb.io/docs/integrations/bullmq
+    - --default_lua_flags=allow-undeclared-keys
+
+  resources:
+    requests:
+      cpu: 100m
+    limits:
+      memory: 768Mi

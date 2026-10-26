@@ -1,0 +1,35 @@
+# Original photos and videos, Immich's /data. HDD-backed.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-library
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  capacity:
+    # Capacity is ignored for NFS mounts, but needs to be set anyway
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  nfs:
+    server: ds920.hoyes.dev
+    path: /volume1/data/immich
+  claimRef:
+    namespace: immich
+    name: immich-library
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-library
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 1Ti
+  volumeName: immich-library

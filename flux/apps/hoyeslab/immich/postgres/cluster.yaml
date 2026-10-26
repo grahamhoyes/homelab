@@ -1,0 +1,53 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: immich-pg18
+  namespace: immich
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.4-standard-trixie
+
+  enableSuperuserAccess: true
+
+  storage:
+    storageClass: longhorn-local
+    size: 10Gi
+
+  postgresql:
+    # Immich requires VectorChord, which isn't in the standard image. We mount it as an
+    # image volume extension rather than using a custom postgres image. pgvector, which
+    # VectorChord depends on, is already in the standard image.
+    extensions:
+      - name: vchord
+        image:
+          reference: ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1
+        # Relative to the image root
+        dynamic_library_path:
+          - usr/lib/postgresql/18/lib
+        extension_control_path:
+          - usr/share/postgresql/18
+    shared_preload_libraries:
+      - vchord
+
+  bootstrap:
+    initdb:
+      database: immich
+
+  # Immich expects to be a superuser, so it can create and update its extensions (notably
+  # VectorChord) itself. Otherwise each VectorChord upgrade needs to be updated and reindexed
+  # manually. See https://docs.immich.app/administration/postgres-standalone/
+  managed:
+    roles:
+      - name: immich
+        login: true
+        superuser: true
+        # Keep the password CNPG generated for the app user
+        passwordSecret:
+          name: immich-pg18-app
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: versitygw
+        serverName: immich-pg18-001
