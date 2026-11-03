@@ -56,7 +56,7 @@ spec:
         port: 22
         externalTrafficPolicy: Local
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: git.hoyes.dev
+          external-dns.kubernetes.io/hostname: git.hoyes.dev
 
     ingress:
       enabled: true

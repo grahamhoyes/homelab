@@ -32,8 +32,8 @@ spec:
       tls: true
       ingressClassName: nginx-tailscale
       annotations:
-        external-dns.alpha.kubernetes.io/hostname: longhorn.hoyes.dev
-        external-dns.alpha.kubernetes.io/target: ingress-nginx-tailscale.hoyes.dev
+        external-dns.kubernetes.io/hostname: longhorn.hoyes.dev
+        external-dns.kubernetes.io/target: ingress-nginx-tailscale.hoyes.dev
         cert-manager.io/cluster-issuer: letsencrypt
       host: longhorn.hoyes.dev
       tlsSecret: longhorn-tls

@@ -30,8 +30,8 @@ kind: Ingress
 metadata:
   name: public-service
   annotations:
-    external-dns.alpha.kubernetes.io/target: hoyeslab-tunnel.hoyes.dev
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.kubernetes.io/target: hoyeslab-tunnel.hoyes.dev
+    external-dns.kubernetes.io/cloudflare-proxied: "true"
 spec:
   ingressClassName: nginx-cloudflare
   rules:
@@ -74,8 +74,8 @@ metadata:
   name: tailscale-<service>
   namespace: <namespace>
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: <service>.hoyes.dev
-    external-dns.alpha.kubernetes.io/target: ingress-nginx-tailscale.hoyes.dev
+    external-dns.kubernetes.io/hostname: <service>.hoyes.dev
+    external-dns.kubernetes.io/target: ingress-nginx-tailscale.hoyes.dev
 spec:
   ingressClassName: nginx-tailscale
   rules:
