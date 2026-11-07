@@ -31,6 +31,6 @@ spec:
 
     image:
       repository: cloudflare/cloudflared
-      tag: 2026.10.5
+      tag: 2026.10.7
 
     replicaCount: 2
